@@ -1,0 +1,65 @@
+:root {
+  /* Brand Colors */
+  --color-primary: #c9184a;
+  --color-primary-light: #ffd7e5;
+  --color-primary-soft: #ffe4ea;
+  --color-primary-dark: #8f1238;
+  --color-accent: #de3871;
+
+  /* Gradients - use only for important accents */
+  --gradient-primary: linear-gradient(135deg, #8f1238 0%, #c9184a 55%, #de3871 100%);
+  --gradient-soft: linear-gradient(135deg, rgba(201, 24, 74, 0.1), rgba(222, 56, 113, 0.06));
+
+  /* Background Colors */
+  --color-white: #ffffff;
+  --color-bg: #f7f8fb;
+  --color-bg-soft: #f1f3f7;
+  --color-surface: #ffffff;
+
+  /* Text Colors */
+  --color-text: #18181b;
+  --color-text-muted: #6b7280;
+  --color-text-light: #9ca3af;
+
+  /* Border */
+  --color-border: #e5e7eb;
+  --color-border-strong: #d1d5db;
+
+  /* Shadows - cleaner and less blurry */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 3px 10px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 18px rgba(15, 23, 42, 0.08);
+  --shadow-primary: 0 8px 18px rgba(143, 18, 56, 0.16);
+
+  /* Status Colors */
+  --color-success: #16a34a;
+  --color-success-bg: #ecfdf3;
+
+  --color-warning: #d97706;
+  --color-warning-bg: #fff7ed;
+
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+
+  --color-info: #2563eb;
+  --color-info-bg: #eff6ff;
+
+  /* Typography */
+  --font-main: "Poppins", sans-serif;
+
+  /* Sizing */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 76px;
+  --topbar-height: 76px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Transition */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}
