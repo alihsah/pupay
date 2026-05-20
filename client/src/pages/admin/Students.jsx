@@ -1,4 +1,4 @@
-function Dashboard() {
+function Students() {
   return (
     <div className="page-container">
       <h1>Page Name</h1>
@@ -6,4 +6,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default Students;

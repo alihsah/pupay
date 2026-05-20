@@ -1,0 +1,133 @@
+.topbar {
+  min-height: var(--topbar-height);
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  position: sticky;
+  top: 0;
+  z-index: 80;
+}
+
+.topbar h1 {
+  font-size: 1.45rem;
+  color: var(--color-text);
+  letter-spacing: -0.03em;
+}
+
+.topbar p {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.topbar-search {
+  width: 320px;
+  height: 44px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: var(--transition-fast);
+}
+
+.topbar-search:focus-within {
+  background-color: var(--color-white);
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+.topbar-search svg {
+  color: var(--color-text-muted);
+}
+
+.topbar-search input {
+  width: 100%;
+  border: none;
+  outline: none;
+  color: var(--color-text);
+  background-color: transparent;
+  font-size: 0.9rem;
+}
+
+.topbar-search input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.topbar-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+
+.topbar-icon-btn:hover {
+  color: var(--color-primary-dark);
+  background-color: var(--color-primary-light);
+}
+
+.topbar-profile {
+  height: 44px;
+  padding: 0 14px 0 6px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text);
+  font-weight: 600;
+  transition: var(--transition-fast);
+}
+
+.topbar-profile:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.topbar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 980px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .topbar-search {
+    flex: 1;
+    min-width: 220px;
+  }
+}
