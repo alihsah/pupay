@@ -1,0 +1,17 @@
+.page-alert {
+  padding: 16px 20px;
+  border-radius: 16px;
+  font-weight: 600;
+}
+
+.page-alert.success {
+  background: var(--color-surface);
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.page-alert.error {
+  background: #fdf2f8;
+  color: #d4145a;
+  border: 1px solid #fbcfe8;
+}

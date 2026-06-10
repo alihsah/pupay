@@ -1,0 +1,172 @@
+.student-dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.student-dashboard-welcome {
+  padding: 28px;
+  border-radius: 26px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.student-dashboard-welcome h2 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.student-dashboard-welcome p {
+  margin: 8px 0 0;
+  color: var(--color-text-muted);
+}
+
+.student-dashboard-welcome > strong {
+  font-size: 1.8rem;
+  color: var(--color-primary, #c9184a);
+  white-space: nowrap;
+}
+
+.student-dashboard-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.student-dashboard-two-column {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.student-dashboard-panel {
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.student-dashboard-panel-header {
+  margin-bottom: 18px;
+}
+
+.student-dashboard-panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.student-dashboard-panel-header p {
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+}
+
+.student-dashboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.student-dashboard-list-item {
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+}
+
+.student-dashboard-list-item strong,
+.student-dashboard-list-item span {
+  display: block;
+}
+
+.student-dashboard-list-item span {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.student-dashboard-list-meta {
+  text-align: right;
+}
+
+.student-dashboard-empty {
+  color: var(--color-text-muted);
+}
+
+.status-pill,
+.announcement-type-pill {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status-pill.active,
+.status-pill.paid {
+  background: rgba(38, 166, 91, 0.12);
+  color: #168047;
+}
+
+.status-pill.pending {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.status-pill.overdue,
+.announcement-type-pill.deadline {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.announcement-type-pill.general {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+.announcement-type-pill.payment_reminder {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+@media (max-width: 1200px) {
+  .student-dashboard-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .student-dashboard-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .student-dashboard-welcome {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-dashboard-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-dashboard-list-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-dashboard-list-meta {
+    text-align: left;
+  }
+}

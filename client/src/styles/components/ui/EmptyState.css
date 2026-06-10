@@ -17,7 +17,7 @@
   width: 52px;
   height: 52px;
   border-radius: 16px;
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   color: var(--color-primary-dark);
   display: flex;
   align-items: center;
