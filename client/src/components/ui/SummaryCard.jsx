@@ -2,11 +2,11 @@ import "../../styles/components/ui/SummaryCard.css";
 
 function SummaryCard({ title, value, icon: Icon, note }) {
   return (
-    <div className="summary-card">
+    <article className="summary-card">
       <div className="summary-card-header">
         <div>
-          <p>{title}</p>
-          <h3>{value}</h3>
+          <span>{title}</span>
+          <strong>{value}</strong>
         </div>
 
         {Icon && (
@@ -16,8 +16,8 @@ function SummaryCard({ title, value, icon: Icon, note }) {
         )}
       </div>
 
-      {note && <span>{note}</span>}
-    </div>
+      {note && <small>{note}</small>}
+    </article>
   );
 }
 

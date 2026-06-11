@@ -1,36 +1,56 @@
-// ========================================
-// FUTURE API SERVICE
-// Handles student-related API requests
-// ========================================
+import api from "./api";
 
-// GET /api/students
-export async function getStudents() {
-  // const response = await fetch("/api/students");
-  // return response.json();
+export const getStudents = async () => {
+  const response = await api.get("/students");
+  return response.data;
+};
 
-  return [];
-}
+export const getStudentById = async (id) => {
+  const response = await api.get(`/students/${id}`);
+  return response.data;
+};
 
-// GET /api/students/:id
-export async function getStudentById(id) {
-  // const response = await fetch(`/api/students/${id}`);
-  // return response.json();
+export const createStudent = async (studentData) => {
+  const response = await api.post("/students", studentData);
+  return response.data;
+};
 
-  return null;
-}
+export const updateStudent = async (id, studentData) => {
+  const response = await api.put(`/students/${id}`, studentData);
+  return response.data;
+};
 
-// GET /api/students/:id/payments
-export async function getStudentPayments(id) {
-  // const response = await fetch(`/api/students/${id}/payments`);
-  // return response.json();
+export const updateStudentStatus = async (id, status) => {
+  const response = await api.patch(`/students/${id}/status`, { status });
+  return response.data;
+};
 
-  return [];
-}
+export const unlinkStudentAccount = async (id) => {
+  const response = await api.patch(`/students/${id}/unlink`);
+  return response.data;
+};
 
-// GET /api/students/:id/collections
-export async function getStudentCollections(id) {
-  // const response = await fetch(`/api/students/${id}/collections`);
-  // return response.json();
+export const importStudents = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
 
-  return [];
-}
+  const response = await api.post("/students/import", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
+
+export const countTargetStudents = async ({ course, year_level, section }) => {
+  const response = await api.get("/students/count-target", {
+    params: {
+      course,
+      year_level,
+      section,
+    },
+  });
+
+  return response.data;
+};

@@ -3,16 +3,21 @@ import { Routes, Route } from "react-router-dom";
 import DashboardLayout from "../components/layout/DashboardLayout";
 
 import Landing from "../pages/auth/Landing";
-import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
+import SignInPage from "../pages/auth/SignInPage";
+import SignUpPage from "../pages/auth/SignUpPage";
 import Unauthorized from "../pages/auth/Unauthorized";
+
+import ClerkTokenProvider from "./ClerkTokenProvider";
+import ProtectedRoute from "./ProtectedRoute";
+import RoleRoute from "./RoleRoute";
+import RoleRedirect from "./RoleRedirect";
 
 import AdminDashboard from "../pages/admin/Dashboard";
 import AdminCollections from "../pages/admin/Collections";
+import AdminCollectionDetails from "../pages/admin/CollectionDetails";
 import AdminPayments from "../pages/admin/Payments";
 import AdminStudents from "../pages/admin/Students";
 import AdminAnnouncements from "../pages/admin/Announcements";
-import AdminAIHelper from "../pages/admin/AIHelper";
 import AdminSettings from "../pages/admin/Settings";
 
 import StudentDashboard from "../pages/student/Dashboard";
@@ -23,123 +28,175 @@ import StudentProfile from "../pages/student/Profile";
 
 function AppRoutes() {
   return (
-    <Routes>
-      {/* Public Pages */}
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
+    <ClerkTokenProvider>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/sign-in/*" element={<SignInPage />} />
+        <Route path="/sign-up/*" element={<SignUpPage />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
 
-      {/* Admin Pages */}
-      <Route
-        path="/admin/dashboard"
-        element={
-          <DashboardLayout>
-            <AdminDashboard />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <RoleRedirect />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/admin/collections"
-        element={
-          <DashboardLayout>
-            <AdminCollections />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["admin"]}>
+                <DashboardLayout>
+                  <AdminDashboard />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/admin/payments"
-        element={
-          <DashboardLayout>
-            <AdminPayments />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/admin/collections"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["admin"]}>
+                <DashboardLayout>
+                  <AdminCollections />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/admin/students"
-        element={
-          <DashboardLayout>
-            <AdminStudents />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/admin/collections/:id"
+          element={
+            <DashboardLayout>
+              <AdminCollectionDetails />
+            </DashboardLayout>
+          }
+        />
 
-      <Route
-        path="/admin/announcements"
-        element={
-          <DashboardLayout>
-            <AdminAnnouncements />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/admin/payments"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["admin"]}>
+                <DashboardLayout>
+                  <AdminPayments />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/admin/ai-helper"
-        element={
-          <DashboardLayout>
-            <AdminAIHelper />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/admin/students"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["admin"]}>
+                <DashboardLayout>
+                  <AdminStudents />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/admin/settings"
-        element={
-          <DashboardLayout>
-            <AdminSettings />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/admin/announcements"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["admin"]}>
+                <DashboardLayout>
+                  <AdminAnnouncements />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Student Pages */}
-      <Route
-        path="/student/dashboard"
-        element={
-          <DashboardLayout>
-            <StudentDashboard />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["admin"]}>
+                <DashboardLayout>
+                  <AdminSettings />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/student/collections"
-        element={
-          <DashboardLayout>
-            <StudentCollections />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/student/dashboard"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["student"]}>
+                <DashboardLayout>
+                  <StudentDashboard />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/student/payments"
-        element={
-          <DashboardLayout>
-            <StudentPayments />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/student/collections"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["student"]}>
+                <DashboardLayout>
+                  <StudentCollections />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/student/announcements"
-        element={
-          <DashboardLayout>
-            <StudentAnnouncements />
-          </DashboardLayout>
-        }
-      />
+        <Route
+          path="/student/payments"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["student"]}>
+                <DashboardLayout>
+                  <StudentPayments />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/student/profile"
-        element={
-          <DashboardLayout>
-            <StudentProfile />
-          </DashboardLayout>
-        }
-      />
-    </Routes>
+        <Route
+          path="/student/announcements"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["student"]}>
+                <DashboardLayout>
+                  <StudentAnnouncements />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/profile"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["student"]}>
+                <DashboardLayout>
+                  <StudentProfile />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </ClerkTokenProvider>
   );
 }
 

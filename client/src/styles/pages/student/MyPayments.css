@@ -169,6 +169,21 @@
   color: var(--color-text-muted);
 }
 
+.student-pay-online-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 12px 28px rgba(201, 24, 74, 0.18);
+}
+
+.student-pay-online-btn:hover {
+  transform: translateY(-1px);
+}
+
 @media (max-width: 1100px) {
   .student-payment-summary-grid {
     grid-template-columns: repeat(2, 1fr);

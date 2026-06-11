@@ -154,6 +154,100 @@
   color: var(--color-text-muted);
 }
 
+.student-collection-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.student-collection-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.student-collection-meta-grid div {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-soft);
+}
+
+.student-collection-meta-grid span {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.student-collection-meta-grid strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.student-collection-progress {
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface-soft);
+}
+
+.student-collection-progress-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.student-collection-progress-header strong {
+  color: var(--color-primary);
+}
+
+.student-collection-progress-bar {
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.student-collection-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #c9184a),
+    #ff4d6d
+  );
+  transition: width 0.3s ease;
+}
+
+.student-collection-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.student-collection-counts span {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.status-pill.locked {
+  background: rgba(201, 24, 74, 0.12);
+  color: var(--color-primary);
+}
+
 @media (max-width: 1100px) {
   .student-collection-summary-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -166,11 +260,21 @@
   .student-collection-footer {
     justify-content: flex-start;
   }
+
+  .student-collection-meta-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 640px) {
   .student-collection-summary-grid,
-  .student-collections-toolbar {
+  .student-collections-toolbar,
+  .student-collection-meta-grid {
     grid-template-columns: 1fr;
+  }
+
+  .student-collection-main,
+  .student-collection-progress-header {
+    flex-direction: column;
   }
 }
