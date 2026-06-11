@@ -10,7 +10,8 @@ import {
   UserRound,
 } from "lucide-react";
 
-import { NavLink, useLocation } from "react-router-dom";
+import { useClerk } from "@clerk/clerk-react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "../../styles/components/layout/Sidebar.css";
 
 const adminMenuItems = [
@@ -81,9 +82,16 @@ const studentMenuItems = [
 
 function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useClerk();
 
   const isStudentPage = location.pathname.startsWith("/student");
   const menuItems = isStudentPage ? studentMenuItems : adminMenuItems;
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <aside className="sidebar">
@@ -117,11 +125,6 @@ function Sidebar() {
           })}
         </nav>
       </div>
-
-      <button className="sidebar-link logout-link" type="button">
-        <LogOut size={21} />
-        <span>Logout</span>
-      </button>
     </aside>
   );
 }

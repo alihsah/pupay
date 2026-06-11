@@ -75,7 +75,7 @@
   width: 100%;
   min-height: 48px;
   padding: 0 14px;
-  border-radius: var(--radius-pill);
+  border-radius: 14px;
   background-color: transparent;
   color: var(--color-text-muted);
   display: flex;
@@ -104,14 +104,14 @@
 }
 
 .sidebar-link:hover {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary-dark);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
 }
 
 .sidebar-link.active {
-  background: var(--gradient-primary);
-  color: var(--color-white);
-  box-shadow: var(--shadow-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  box-shadow: inset 3px 0 0 var(--color-primary);
 }
 
 .logout-link {

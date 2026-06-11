@@ -72,24 +72,22 @@ function Topbar() {
       </div>
 
       <div className="topbar-actions">
-        <div className="topbar-search">
+        <div className="topbar-search is-disabled" aria-disabled="true">
           <Search size={18} />
-          <input type="text" placeholder="Search collections, payments..." />
+          <input
+            type="text"
+            placeholder="Search is unavailable"
+            disabled
+            tabIndex="-1"
+          />
         </div>
 
         <button className="topbar-icon-btn" type="button">
           <Bell size={20} />
         </button>
 
-        <div className="topbar-profile">
+        <div className="topbar-user topbar-user-avatar-only">
           <UserButton afterSignOutUrl="/" />
-
-          <div className="topbar-user-info">
-            <span>{currentUser?.fullName || currentUser?.email || "User"}</span>
-            <small>
-              {currentUser?.role === "admin" ? "Administrator" : "Student"}
-            </small>
-          </div>
         </div>
       </div>
     </header>

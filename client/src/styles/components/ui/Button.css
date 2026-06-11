@@ -1,45 +1,108 @@
-.btn {
-  border-radius: var(--radius-pill);
+.btn,
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.archive-btn {
+  border: 1px solid transparent;
+  border-radius: 14px;
   font-weight: 600;
-  transition: var(--transition-fast);
+  transition: background-color var(--transition-fast),
+    border-color var(--transition-fast), color var(--transition-fast),
+    box-shadow var(--transition-fast), transform var(--transition-fast);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  cursor: pointer;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.btn:hover {
+.btn:hover,
+.primary-btn:hover,
+.secondary-btn:hover,
+.danger-btn:hover,
+.archive-btn:hover {
   transform: translateY(-1px);
 }
 
-.btn-primary {
+.btn:active,
+.primary-btn:active,
+.secondary-btn:active,
+.danger-btn:active,
+.archive-btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled,
+.primary-btn:disabled,
+.secondary-btn:disabled,
+.danger-btn:disabled,
+.archive-btn:disabled,
+.btn[aria-disabled="true"],
+.primary-btn[aria-disabled="true"],
+.secondary-btn[aria-disabled="true"],
+.danger-btn[aria-disabled="true"],
+.archive-btn[aria-disabled="true"] {
+  opacity: 0.58;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-primary,
+.primary-btn {
   background: var(--gradient-primary);
   color: var(--color-white);
   box-shadow: var(--shadow-primary);
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.primary-btn:hover {
   background: linear-gradient(135deg, #7a0f2f 0%, #b91543 55%, #c9184a 100%);
   color: var(--color-white);
   box-shadow: 0 6px 14px rgba(143, 18, 56, 0.22);
-  transform: translateY(-2px);
 }
 
-.btn-secondary {
+.btn-secondary,
+.secondary-btn {
   background-color: var(--color-surface);
-  color: var(--color-primary-dark);
+  color: var(--color-text);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-xs);
 }
 
-.btn-secondary:hover {
-  background-color: var(--color-primary-light);
+.btn-secondary:hover,
+.secondary-btn:hover {
+  background-color: var(--color-primary-soft);
   border-color: var(--color-primary-soft);
+  color: var(--color-primary);
 }
 
-.btn-danger {
+.btn-danger,
+.danger-btn {
   background-color: var(--color-danger);
   color: var(--color-white);
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.12);
+}
+
+.btn-danger:hover,
+.danger-btn:hover {
+  background-color: #b91c1c;
+  color: var(--color-white);
+  box-shadow: 0 6px 14px rgba(220, 38, 38, 0.18);
+}
+
+.archive-btn {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  border-color: rgba(220, 38, 38, 0.18);
+}
+
+.archive-btn:hover {
+  background-color: rgba(220, 38, 38, 0.12);
+  color: var(--color-danger);
+  border-color: rgba(220, 38, 38, 0.28);
 }
 
 .btn-sm {
