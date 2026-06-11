@@ -1,0 +1,376 @@
+.collection-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.collection-back-btn {
+  width: fit-content;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  font-weight: 700;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collection-details-hero,
+.collection-payments-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.collection-details-hero {
+  padding: 28px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.collection-details-hero h2 {
+  margin: 0;
+  font-size: 1.55rem;
+}
+
+.collection-details-hero p {
+  margin: 8px 0 0;
+  color: var(--color-text-muted);
+}
+
+.collection-details-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.collection-details-meta span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.collection-details-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.collection-payments-panel {
+  padding: 24px;
+}
+
+.collection-payments-header {
+  margin-bottom: 20px;
+}
+
+.collection-payments-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.collection-payments-header p {
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+}
+
+.collection-payments-toolbar {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.collection-payments-toolbar input,
+.collection-payments-toolbar select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.collection-payments-table-wrap {
+  overflow-x: auto;
+}
+
+.collection-payments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.collection-payments-table th,
+.collection-payments-table td {
+  padding: 14px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.collection-payments-table th {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.collection-payments-table td span,
+.collection-payments-table td small {
+  display: block;
+}
+
+.collection-payments-table td small {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+}
+
+.collection-payment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.collection-payment-actions button {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.status-pill {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status-pill.active,
+.status-pill.paid {
+  background: rgba(38, 166, 91, 0.12);
+  color: #168047;
+}
+
+.status-pill.pending {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.status-pill.overdue {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.status-pill.closed {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.status-pill.archived {
+  background: rgba(120, 120, 120, 0.15);
+  color: #666;
+}
+
+.collection-progress-panel {
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.collection-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.collection-progress-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.collection-progress-header p {
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+}
+
+.collection-progress-header strong {
+  font-size: 1.8rem;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.collection-progress-bar {
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+}
+
+.collection-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #c9184a),
+    #ff4d6d
+  );
+  transition: width 0.3s ease;
+}
+
+.collection-progress-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.collection-progress-details span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.status-pill.locked {
+  background: rgba(201, 24, 74, 0.12);
+  color: var(--color-primary);
+}
+
+.payment-confirm-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.payment-confirm-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.payment-confirm-summary div {
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface-soft);
+}
+
+.payment-confirm-summary span {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.payment-confirm-summary strong {
+  display: block;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.capitalize-text {
+  text-transform: capitalize;
+}
+
+.primary-btn:disabled,
+.secondary-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.payment-confirm-content input {
+  width: 100%;
+  min-height: 54px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.payment-confirm-content input:focus {
+  outline: none;
+  border-color: rgba(201, 24, 74, 0.45);
+  box-shadow: 0 0 0 4px rgba(201, 24, 74, 0.08);
+}
+
+@media (max-width: 1100px) {
+  .collection-details-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .collection-payments-toolbar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .collection-payments-toolbar .search-group {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .collection-details-hero {
+    flex-direction: column;
+  }
+
+  .collection-details-summary-grid,
+  .collection-payments-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .collection-payments-toolbar .search-group {
+    grid-column: auto;
+  }
+
+  .collection-progress-header {
+    flex-direction: column;
+  }
+
+  .collection-progress-header strong {
+    font-size: 1.5rem;
+  }
+
+  .payment-confirm-summary {
+    grid-template-columns: 1fr;
+  }
+}

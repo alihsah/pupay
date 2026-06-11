@@ -1,55 +1,31 @@
-// ========================================
-// FUTURE API SERVICE
-// Handles payment-related API requests
-// ========================================
+import api from "./api";
 
-// GET /api/payments
-export async function getPayments() {
-  // const response = await fetch("/api/payments");
-  // return response.json();
+export const getPayments = async () => {
+  const response = await api.get("/payments");
+  return response.data;
+};
 
-  return [];
-}
+export const getStudentPayments = async (studentId) => {
+  const response = await api.get(`/payments/student/${studentId}`);
+  return response.data;
+};
 
-// GET /api/payments/:id
-export async function getPaymentById(id) {
-  // const response = await fetch(`/api/payments/${id}`);
-  // return response.json();
+export const getPaymentsByCollection = async (collectionId) => {
+  const response = await api.get(`/payments/collection/${collectionId}`);
+  return response.data;
+};
 
-  return null;
-}
+export const createPayment = async (paymentData) => {
+  const response = await api.post("/payments", paymentData);
+  return response.data;
+};
 
-// GET /api/payments/student/:studentId
-export async function getPaymentsByStudent(studentId) {
-  // const response = await fetch(`/api/payments/student/${studentId}`);
-  // return response.json();
+export const updatePaymentStatus = async (id, paymentData) => {
+  const response = await api.patch(`/payments/${id}/status`, paymentData);
+  return response.data;
+};
 
-  return [];
-}
-
-// POST /api/payments
-export async function createCashPayment(paymentData) {
-  // const response = await fetch("/api/payments", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(paymentData),
-  // });
-  // return response.json();
-
-  return paymentData;
-}
-
-// POST /api/payments/paymongo/create-checkout
-export async function createPayMongoCheckout(paymentData) {
-  // const response = await fetch("/api/payments/paymongo/create-checkout", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(paymentData),
-  // });
-  // return response.json();
-
-  return {
-    checkoutUrl: "#",
-    ...paymentData,
-  };
-}
+export const createPayMongoCheckout = async (paymentId) => {
+  const response = await api.post(`/payments/${paymentId}/paymongo-checkout`);
+  return response.data;
+};

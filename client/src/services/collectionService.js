@@ -1,53 +1,36 @@
-// ========================================
-// FUTURE API SERVICE
-// Handles collection-related API requests
-// ========================================
+import api from "./api";
 
-// GET /api/collections
-export async function getCollections() {
-  // const response = await fetch("/api/collections");
-  // return response.json();
+export const getCollections = async () => {
+  const response = await api.get("/collections");
+  return response.data;
+};
 
-  return [];
-}
+export const getMyCollections = async () => {
+  const response = await api.get("/collections/student/my");
+  return response.data;
+};
 
-// GET /api/collections/:id
-export async function getCollectionById(id) {
-  // const response = await fetch(`/api/collections/${id}`);
-  // return response.json();
+export const getCollectionById = async (id) => {
+  const response = await api.get(`/collections/${id}`);
+  return response.data;
+};
 
-  return null;
-}
+export const getCollectionProgress = async (id) => {
+  const response = await api.get(`/collections/${id}/progress`);
+  return response.data;
+};
 
-// POST /api/collections
-export async function createCollection(collectionData) {
-  // const response = await fetch("/api/collections", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(collectionData),
-  // });
-  // return response.json();
+export const createCollection = async (collectionData) => {
+  const response = await api.post("/collections", collectionData);
+  return response.data;
+};
 
-  return collectionData;
-}
+export const updateCollection = async (id, collectionData) => {
+  const response = await api.put(`/collections/${id}`, collectionData);
+  return response.data;
+};
 
-// PUT /api/collections/:id
-export async function updateCollection(id, collectionData) {
-  // const response = await fetch(`/api/collections/${id}`, {
-  //   method: "PUT",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(collectionData),
-  // });
-  // return response.json();
-
-  return { id, ...collectionData };
-}
-
-// DELETE /api/collections/:id
-export async function deleteCollection(id) {
-  // await fetch(`/api/collections/${id}`, {
-  //   method: "DELETE",
-  // });
-
-  return id;
-}
+export const updateCollectionStatus = async (id, status) => {
+  const response = await api.patch(`/collections/${id}/status`, { status });
+  return response.data;
+};

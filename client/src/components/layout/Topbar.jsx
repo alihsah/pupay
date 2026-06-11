@@ -1,5 +1,7 @@
-import { Search, Bell, UserRound } from "lucide-react";
+import { Search, Bell } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { UserButton } from "@clerk/clerk-react";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 import "../../styles/components/layout/Topbar.css";
 
 const pageTitles = {
@@ -55,6 +57,7 @@ const pageTitles = {
 
 function Topbar() {
   const location = useLocation();
+  const { currentUser } = useCurrentUser();
 
   const currentPage = pageTitles[location.pathname] || {
     title: "PUPay",
@@ -78,13 +81,16 @@ function Topbar() {
           <Bell size={20} />
         </button>
 
-        <button className="topbar-profile" type="button">
-          <div className="topbar-avatar">
-            <UserRound size={18} />
-          </div>
+        <div className="topbar-profile">
+          <UserButton afterSignOutUrl="/" />
 
-          <span>Admin</span>
-        </button>
+          <div className="topbar-user-info">
+            <span>{currentUser?.fullName || currentUser?.email || "User"}</span>
+            <small>
+              {currentUser?.role === "admin" ? "Administrator" : "Student"}
+            </small>
+          </div>
+        </div>
       </div>
     </header>
   );

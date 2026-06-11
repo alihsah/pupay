@@ -1,45 +1,26 @@
-// ========================================
-// FUTURE API SERVICE
-// Handles announcement-related API requests
-// ========================================
+import api from "./api";
 
-// GET /api/announcements
-export async function getAnnouncements() {
-  // const response = await fetch("/api/announcements");
-  // return response.json();
+export const getAnnouncements = async () => {
+  const response = await api.get("/announcements");
+  return response.data;
+};
 
-  return [];
-}
+export const getMyAnnouncements = async () => {
+  const response = await api.get("/announcements/student/my");
+  return response.data;
+};
 
-// POST /api/announcements
-export async function createAnnouncement(announcementData) {
-  // const response = await fetch("/api/announcements", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(announcementData),
-  // });
-  // return response.json();
+export const createAnnouncement = async (announcementData) => {
+  const response = await api.post("/announcements", announcementData);
+  return response.data;
+};
 
-  return announcementData;
-}
+export const updateAnnouncement = async (id, announcementData) => {
+  const response = await api.put(`/announcements/${id}`, announcementData);
+  return response.data;
+};
 
-// PUT /api/announcements/:id
-export async function updateAnnouncement(id, announcementData) {
-  // const response = await fetch(`/api/announcements/${id}`, {
-  //   method: "PUT",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(announcementData),
-  // });
-  // return response.json();
-
-  return { id, ...announcementData };
-}
-
-// DELETE /api/announcements/:id
-export async function deleteAnnouncement(id) {
-  // await fetch(`/api/announcements/${id}`, {
-  //   method: "DELETE",
-  // });
-
-  return id;
-}
+export const updateAnnouncementStatus = async (id, status) => {
+  const response = await api.patch(`/announcements/${id}/status`, { status });
+  return response.data;
+};

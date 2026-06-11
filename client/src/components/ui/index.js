@@ -6,3 +6,5 @@ export { default as SearchBar } from "./SearchBar";
 export { default as SummaryCard } from "./SummaryCard";
 export { default as StatusBadge } from "./StatusBadge";
 export { default as EmptyState } from "./EmptyState";
+export { default as Modal } from "./Modal";
+export { default as Toast } from "./Toast";

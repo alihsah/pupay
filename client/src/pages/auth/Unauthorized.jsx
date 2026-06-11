@@ -1,8 +1,9 @@
 function Unauthorized() {
   return (
-    <div className="page-container">
-      <h1>Page Name</h1>
-    </div>
+    <main style={{ padding: "2rem" }}>
+      <h1>Access Denied</h1>
+      <p>Your account is not allowed to access this page.</p>
+    </main>
   );
 }
 
