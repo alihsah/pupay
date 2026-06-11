@@ -1,8 +1,8 @@
 .empty-state {
   min-height: 220px;
-  background: var(--gradient-soft);
-  border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  border: 1px dashed var(--color-border);
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,9 +16,9 @@
 .empty-state-icon {
   width: 52px;
   height: 52px;
-  border-radius: 16px;
+  border-radius: 14px;
   background-color: var(--color-surface);
-  color: var(--color-primary-dark);
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;

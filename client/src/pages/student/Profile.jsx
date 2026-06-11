@@ -1,4 +1,15 @@
-import { UserRound, Mail, GraduationCap, Hash, ShieldCheck } from "lucide-react";
+import {
+  UserRound,
+  Mail,
+  GraduationCap,
+  Hash,
+  ShieldCheck,
+  Palette,
+  Moon,
+  Sun,
+} from "lucide-react";
+
+import { useTheme } from "../../context/ThemeContext";
 
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 
@@ -6,6 +17,7 @@ import "../../styles/pages/student/Profile.css";
 
 function StudentProfile() {
   const { currentUser, loading } = useCurrentUser();
+  const { theme, toggleTheme } = useTheme();
 
   if (loading) {
     return (
@@ -116,6 +128,36 @@ function StudentProfile() {
               </article>
             );
           })}
+        </div>
+      </section>
+
+      <section className="student-profile-panel">
+        <div className="student-profile-panel-header">
+          <div>
+            <h3>Theme Preference</h3>
+            <p>Switch between light and dark mode for your student portal.</p>
+          </div>
+        </div>
+
+        <div className="student-theme-card">
+          <div className="student-profile-item-icon">
+            {theme === "dark" ? <Moon size={20} /> : <Sun size={20} />}
+          </div>
+
+          <div className="student-theme-content">
+            <h4>{theme === "dark" ? "Dark Mode" : "Light Mode"}</h4>
+            <p>
+              Your theme preference is saved only for your account on this browser.
+            </p>
+          </div>
+
+          <button
+            className="student-theme-toggle-btn"
+            type="button"
+            onClick={toggleTheme}
+          >
+            {theme === "dark" ? "Switch to Light" : "Switch to Dark"}
+          </button>
         </div>
       </section>
 
