@@ -8,7 +8,7 @@ import {
   updatePaymentStatus,
 } from "../../services/paymentService";
 
-import { SummaryCard, Toast } from "../../components/ui";
+import { Modal, SummaryCard, Toast } from "../../components/ui";
 import { PaymentStatusConfirmModal } from "../../components/payments";
 
 import "../../styles/pages/admin/CollectionDetails.css";
@@ -34,6 +34,8 @@ function AdminCollectionDetails() {
   const [nextPaymentStatus, setNextPaymentStatus] = useState("");
   const [confirmText, setConfirmText] = useState("");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportGeneratedAt, setReportGeneratedAt] = useState(null);
 
   const loadCollectionDetails = async (showPageLoading = true) => {
     try {
@@ -118,6 +120,20 @@ function AdminCollectionDetails() {
     event.target.value = "";
   };
 
+  const openReportModal = () => {
+    setReportGeneratedAt(new Date());
+    setShowReportModal(true);
+  };
+
+  const closeReportModal = () => {
+    setShowReportModal(false);
+    setReportGeneratedAt(null);
+  };
+
+  const handlePrintReport = () => {
+    window.print();
+  };
+
   const formatCurrency = (amount) => {
     return Number(amount || 0).toLocaleString("en-PH", {
       style: "currency",
@@ -133,6 +149,43 @@ function AdminCollectionDetails() {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const hasReportValue = (value) =>
+    value !== undefined && value !== null && value !== "";
+
+  const formatReportText = (value) =>
+    hasReportValue(value) ? String(value) : "N/A";
+
+  const formatReportCurrency = (amount) =>
+    hasReportValue(amount) ? formatCurrency(amount) : "N/A";
+
+  const formatReportDate = (date) => {
+    if (!hasReportValue(date)) return "N/A";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) return "N/A";
+
+    return formatDate(parsedDate);
+  };
+
+  const formatReportStatus = (status) => {
+    if (!hasReportValue(status)) return "N/A";
+
+    return String(status).charAt(0).toUpperCase() + String(status).slice(1);
+  };
+
+  const formatPaymentMethod = (method) => {
+    if (!hasReportValue(method)) return "N/A";
+
+    const methodLabels = {
+      cash: "Cash",
+      gcash: "GCash",
+      card: "Card",
+    };
+
+    return methodLabels[method] || String(method);
   };
 
   const formatAudience = (item) => {
@@ -153,6 +206,26 @@ function AdminCollectionDetails() {
     if (item.section !== "ALL") parts.push(`Section ${item.section}`);
 
     return parts.join(" • ");
+  };
+
+  const formatReportAudience = (item) => {
+    if (!item) return "N/A";
+
+    if (
+      item.course === "ALL" &&
+      item.year_level === "ALL" &&
+      item.section === "ALL"
+    ) {
+      return "All Students";
+    }
+
+    const parts = [];
+
+    if (item.course !== "ALL") parts.push(item.course);
+    if (item.year_level !== "ALL") parts.push(item.year_level);
+    if (item.section !== "ALL") parts.push(`Section ${item.section}`);
+
+    return parts.length > 0 ? parts.join(" / ") : "N/A";
   };
 
   const filteredPayments = payments
@@ -243,9 +316,19 @@ function AdminCollectionDetails() {
           </div>
         </div>
 
-        <span className={`status-pill ${collection.is_locked ? "locked" : collection.status}`}>
-          {collection.is_locked ? "locked" : collection.status}
-        </span>
+        <div className="collection-details-actions">
+          <span className={`status-pill ${collection.is_locked ? "locked" : collection.status}`}>
+            {collection.is_locked ? "locked" : collection.status}
+          </span>
+
+          <button
+            className="collection-print-report-btn"
+            type="button"
+            onClick={openReportModal}
+          >
+            Print Report
+          </button>
+        </div>
       </section>
 
       {progress && (
@@ -445,6 +528,149 @@ function AdminCollectionDetails() {
         onConfirm={handleUpdateStatus}
         formatCurrency={formatCurrency}
       />
+
+      {showReportModal && (
+        <Modal
+          title="Collection Payment Report"
+          subtitle="Review this collection report before printing."
+          onClose={closeReportModal}
+        >
+          <section className="collection-report-print-area">
+            <div className="collection-report-header">
+              <div>
+                <p className="collection-report-brand">PUPay</p>
+                <h3>Collection Payment Report</h3>
+              </div>
+
+              <span className={`status-pill ${collection.is_locked ? "locked" : collection.status}`}>
+                {collection.is_locked ? "Locked" : formatReportStatus(collection.status)}
+              </span>
+            </div>
+
+            <div className="collection-report-summary">
+              <div>
+                <span>Collection Title</span>
+                <strong>{formatReportText(collection.title)}</strong>
+              </div>
+
+              <div>
+                <span>Collection Description</span>
+                <strong>{formatReportText(collection.description)}</strong>
+              </div>
+
+              <div>
+                <span>Target Audience</span>
+                <strong>{formatReportAudience(collection)}</strong>
+              </div>
+
+              <div>
+                <span>Due Date</span>
+                <strong>{formatReportDate(collection.due_date)}</strong>
+              </div>
+
+              <div>
+                <span>Goal Amount</span>
+                <strong>{formatReportCurrency(collection.goal_amount)}</strong>
+              </div>
+
+              <div>
+                <span>Student Contribution</span>
+                <strong>{formatReportCurrency(collection.amount)}</strong>
+              </div>
+
+              <div>
+                <span>Total Collected</span>
+                <strong>
+                  {formatReportCurrency(progress?.totalCollected ?? totalCollected)}
+                </strong>
+              </div>
+
+              <div>
+                <span>Progress</span>
+                <strong>
+                  {hasReportValue(progress?.progress) ? `${progress.progress}%` : "N/A"}
+                </strong>
+              </div>
+
+              <div>
+                <span>Paid Count</span>
+                <strong>{paidCount}</strong>
+              </div>
+
+              <div>
+                <span>Pending Count</span>
+                <strong>{pendingCount}</strong>
+              </div>
+
+              <div>
+                <span>Overdue Count</span>
+                <strong>{overdueCount}</strong>
+              </div>
+
+              <div>
+                <span>Generated Date</span>
+                <strong>{formatReportDate(reportGeneratedAt)}</strong>
+              </div>
+            </div>
+
+            <div className="collection-report-table-wrap">
+              <table className="collection-report-table">
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Student Number</th>
+                    <th>Amount Due</th>
+                    <th>Amount Paid</th>
+                    <th>Status</th>
+                    <th>Payment Method</th>
+                    <th>Reference Number</th>
+                    <th>Paid Date</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {payments.map((payment) => (
+                    <tr key={payment.id}>
+                      <td>{formatReportText(payment.full_name)}</td>
+                      <td>{formatReportText(payment.student_number)}</td>
+                      <td>{formatReportCurrency(payment.amount_due)}</td>
+                      <td>{formatReportCurrency(payment.amount_paid)}</td>
+                      <td>{formatReportStatus(payment.status)}</td>
+                      <td>{formatPaymentMethod(payment.payment_method)}</td>
+                      <td>{formatReportText(payment.reference_number)}</td>
+                      <td>{formatReportDate(payment.paid_at)}</td>
+                    </tr>
+                  ))}
+
+                  {payments.length === 0 && (
+                    <tr>
+                      <td colSpan="8">No payment records available.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <div className="collection-report-actions">
+            <button
+              className="collection-report-secondary-btn"
+              type="button"
+              onClick={closeReportModal}
+            >
+              Close
+            </button>
+
+            <button
+              className="collection-report-print-btn"
+              type="button"
+              onClick={handlePrintReport}
+            >
+              Print Report
+            </button>
+          </div>
+        </Modal>
+      )}
     </main>
   );
 }
