@@ -85,20 +85,20 @@
 }
 
 .student-collection-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .student-collection-item {
-  padding: 18px;
+  padding: 20px;
   border: 1px solid var(--color-border);
-  border-radius: 18px;
+  border-radius: 22px;
   background: var(--color-surface);
-  display: grid;
-  grid-template-columns: 1.5fr 1.2fr auto;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
   gap: 16px;
-  align-items: center;
 }
 
 .student-collection-item h3 {
@@ -109,6 +109,7 @@
 .student-collection-item p {
   margin: 6px 0 0;
   color: var(--color-text-muted);
+  line-height: 1.5;
 }
 
 .student-collection-meta {
@@ -126,11 +127,14 @@
 
 .status-pill {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 6px 10px;
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: capitalize;
+  white-space: nowrap;
 }
 
 .status-pill.active {
@@ -138,11 +142,38 @@
   color: #168047;
 }
 
+.status-pill.pending {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.status-pill.paid {
+  background: rgba(38, 166, 91, 0.12);
+  color: #168047;
+}
+
+.status-pill.overdue {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.status-pill.closed {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.status-pill.archived {
+  background: rgba(120, 120, 120, 0.15);
+  color: var(--color-text-muted);
+}
+
 .student-collections-empty {
+  grid-column: 1 / -1;
   padding: 24px;
   border: 1px dashed var(--color-border);
   border-radius: 18px;
   text-align: center;
+  background: var(--color-surface);
 }
 
 .student-collections-empty h3 {
@@ -161,13 +192,21 @@
   align-items: flex-start;
 }
 
+.student-collection-card-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 0.45fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
 .student-collection-meta-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
 .student-collection-meta-grid div {
+  min-width: 0;
   padding: 12px;
   border: 1px solid var(--color-border);
   border-radius: 14px;
@@ -185,6 +224,53 @@
 .student-collection-meta-grid strong {
   display: block;
   font-size: 0.95rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.student-collection-payment-panel {
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.student-collection-payment-panel span {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.student-collection-payment-panel strong {
+  color: var(--color-text);
+  font-size: 1.05rem;
+  text-transform: capitalize;
+}
+
+.student-collection-payment-panel small {
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.student-pay-online-btn {
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-top: auto;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 12px 28px rgba(201, 24, 74, 0.18);
+}
+
+.student-pay-online-btn:hover {
+  transform: translateY(-1px);
 }
 
 .student-collection-progress {
@@ -201,6 +287,17 @@
   margin-bottom: 10px;
   color: var(--color-text-muted);
   font-size: 0.9rem;
+}
+
+.student-collection-progress-header span,
+.student-collection-progress-header small {
+  display: block;
+}
+
+.student-collection-progress-header small {
+  margin-top: 3px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
 }
 
 .student-collection-progress-header strong {
@@ -253,16 +350,9 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .student-collection-item {
+  .student-collection-list,
+  .student-collection-card-body {
     grid-template-columns: 1fr;
-  }
-
-  .student-collection-footer {
-    justify-content: flex-start;
-  }
-
-  .student-collection-meta-grid {
-    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -276,5 +366,15 @@
   .student-collection-main,
   .student-collection-progress-header {
     flex-direction: column;
+  }
+
+  .student-collections-panel,
+  .student-collection-card,
+  .student-collection-item {
+    border-radius: 18px;
+  }
+
+  .student-collection-payment-panel {
+    align-items: stretch;
   }
 }

@@ -4,14 +4,22 @@ import {
   getMyCollections,
   getCollectionProgress,
 } from "../../services/collectionService";
+import {
+  createPayMongoCheckout,
+  getStudentPayments,
+} from "../../services/paymentService";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 
 import { Toast } from "../../components/ui";
 
 import "../../styles/pages/student/MyCollections.css";
 
 function StudentCollections() {
+  const { currentUser, loadingUser } = useCurrentUser();
+
   const [collections, setCollections] = useState([]);
   const [collectionProgress, setCollectionProgress] = useState({});
+  const [paymentsByCollection, setPaymentsByCollection] = useState({});
 
   const [loading, setLoading] = useState(true);
 
@@ -28,14 +36,24 @@ function StudentCollections() {
       const data = await getMyCollections();
       setCollections(data);
 
-      const progressResults = await Promise.all(
-        data.map(async (collection) => {
-          const progress = await getCollectionProgress(collection.id);
-          return [collection.id, progress];
-        })
-      );
+      const [progressResults, paymentData] = await Promise.all([
+        Promise.all(
+          data.map(async (collection) => {
+            const progress = await getCollectionProgress(collection.id);
+            return [collection.id, progress];
+          })
+        ),
+        currentUser?.studentId
+          ? getStudentPayments(currentUser.studentId)
+          : Promise.resolve([]),
+      ]);
 
       setCollectionProgress(Object.fromEntries(progressResults));
+      setPaymentsByCollection(
+        Object.fromEntries(
+          paymentData.map((payment) => [payment.collection_id, payment])
+        )
+      );
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to load your collections.");
       setMessageType("error");
@@ -45,8 +63,20 @@ function StudentCollections() {
   };
 
   useEffect(() => {
-    loadCollections();
-  }, []);
+    if (!loadingUser) {
+      loadCollections();
+    }
+  }, [loadingUser, currentUser?.studentId]);
+
+  const handlePayOnline = async (payment) => {
+    try {
+      const result = await createPayMongoCheckout(payment.id);
+      window.location.href = result.checkoutUrl;
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Failed to start checkout.");
+      setMessageType("error");
+    }
+  };
 
   const formatCurrency = (amount) => {
     return Number(amount || 0).toLocaleString("en-PH", {
@@ -80,7 +110,36 @@ function StudentCollections() {
     if (collection.year_level !== "ALL") parts.push(collection.year_level);
     if (collection.section !== "ALL") parts.push(`Section ${collection.section}`);
 
+    const audienceLabel = parts.join(" - ");
+    if (audienceLabel) return audienceLabel;
+
     return parts.join(" • ");
+  };
+
+  const formatStatusLabel = (status) => {
+    if (!status) return "active";
+    return status.replace("_", " ");
+  };
+
+  const getProgressValue = (progress) => {
+    const rawValue = Number(progress?.progress || 0);
+
+    if (!Number.isFinite(rawValue)) return 0;
+
+    return Math.min(Math.max(rawValue, 0), 100);
+  };
+
+  const getProgressGoal = (collection, progress) => {
+    return Number(progress?.goalAmount || collection.goal_amount || 0);
+  };
+
+  const getPaymentBalance = (payment, collection, progress) => {
+    const amountDue = Number(
+      payment?.amount_due ?? progress?.studentContribution ?? collection.amount ?? 0
+    );
+    const amountPaid = Number(payment?.amount_paid || 0);
+
+    return Math.max(amountDue - amountPaid, 0);
   };
 
   const filteredCollections = collections
@@ -179,12 +238,25 @@ function StudentCollections() {
           </div>
         </div>
 
-        {loading ? (
+        {loadingUser || loading ? (
           <p>Loading collections...</p>
         ) : (
           <div className="student-collection-list">
             {filteredCollections.map((collection) => {
               const progress = collectionProgress[collection.id];
+              const payment = paymentsByCollection[collection.id];
+              const isLocked = progress?.isLocked || collection.is_locked;
+              const displayStatus = payment?.status || (isLocked ? "locked" : collection.status);
+              const progressValue = getProgressValue(progress);
+              const progressGoal = getProgressGoal(collection, progress);
+              const hasProgressGoal = progressGoal > 0;
+              const totalCollected = Number(progress?.totalCollected || 0);
+              const amountDue = Number(
+                payment?.amount_due ?? progress?.studentContribution ?? collection.amount ?? 0
+              );
+              const amountPaid = Number(payment?.amount_paid || 0);
+              const balance = getPaymentBalance(payment, collection, progress);
+              const canPayOnline = payment && payment.status !== "paid";
 
               return (
                 <article className="student-collection-item" key={collection.id}>
@@ -195,51 +267,83 @@ function StudentCollections() {
                     </div>
 
                     <span
-                      className={`status-pill ${
-                        progress?.isLocked ? "locked" : collection.status
-                      }`}
+                      className={`status-pill ${displayStatus}`}
                     >
-                      {progress?.isLocked ? "locked" : collection.status}
+                      {formatStatusLabel(displayStatus)}
                     </span>
                   </div>
 
-                  <div className="student-collection-meta-grid">
-                    <div>
-                      <span>Goal Amount</span>
-                      <strong>{formatCurrency(collection.goal_amount)}</strong>
+                  <div className="student-collection-card-body">
+                    <div className="student-collection-meta-grid">
+                      <div>
+                        <span>Your Contribution</span>
+                        <strong>{formatCurrency(amountDue)}</strong>
+                      </div>
+
+                      <div>
+                        <span>Due Date</span>
+                        <strong>{formatDate(collection.due_date)}</strong>
+                      </div>
+
+                      <div>
+                        <span>Audience</span>
+                        <strong>{formatAudience(collection)}</strong>
+                      </div>
+
+                      <div>
+                        <span>Progress Goal</span>
+                        <strong>
+                          {hasProgressGoal
+                            ? formatCurrency(progressGoal)
+                            : "Goal not set"}
+                        </strong>
+                      </div>
                     </div>
 
-                    <div>
-                      <span>Your Contribution</span>
-                      <strong>{formatCurrency(collection.amount)}</strong>
-                    </div>
+                    <aside className="student-collection-payment-panel">
+                      <span>Payment Status</span>
+                      <strong>{formatStatusLabel(displayStatus)}</strong>
+                      <small>
+                        {payment?.status === "paid"
+                          ? `Paid ${formatCurrency(amountPaid)}${
+                              payment.paid_at ? ` on ${formatDate(payment.paid_at)}` : ""
+                            }`
+                          : `Balance: ${formatCurrency(balance)}`}
+                      </small>
 
-                    <div>
-                      <span>Due Date</span>
-                      <strong>{formatDate(collection.due_date)}</strong>
-                    </div>
-
-                    <div>
-                      <span>Audience</span>
-                      <strong>{formatAudience(collection)}</strong>
-                    </div>
+                      {canPayOnline && (
+                        <button
+                          className="student-pay-online-btn"
+                          type="button"
+                          onClick={() => handlePayOnline(payment)}
+                        >
+                          Pay Online
+                        </button>
+                      )}
+                    </aside>
                   </div>
 
                   {progress && (
                     <div className="student-collection-progress">
                       <div className="student-collection-progress-header">
-                        <span>
-                          {formatCurrency(progress.totalCollected)} collected out of{" "}
-                          {formatCurrency(progress.goalAmount)}
-                        </span>
+                        <div>
+                          <span>
+                            {hasProgressGoal
+                              ? `${formatCurrency(totalCollected)} collected of ${formatCurrency(progressGoal)}`
+                              : `${formatCurrency(totalCollected)} collected`}
+                          </span>
+                          {!hasProgressGoal && (
+                            <small>Progress goal is not set for this collection.</small>
+                          )}
+                        </div>
 
-                        <strong>{progress.progress}%</strong>
+                        <strong>{progressValue}%</strong>
                       </div>
 
                       <div className="student-collection-progress-bar">
                         <div
                           className="student-collection-progress-fill"
-                          style={{ width: `${progress.progress}%` }}
+                          style={{ width: `${progressValue}%` }}
                         />
                       </div>
 
