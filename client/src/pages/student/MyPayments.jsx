@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { createPayMongoCheckout, getStudentPayments } from "../../services/paymentService";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
-import { Toast } from "../../components/ui";
+import { Modal, Toast } from "../../components/ui";
 
 import "../../styles/pages/student/MyPayments.css";
 
@@ -18,6 +18,8 @@ function StudentPayments() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOption, setSortOption] = useState("due-soon");
+  const [receiptPayment, setReceiptPayment] = useState(null);
+  const [receiptGeneratedAt, setReceiptGeneratedAt] = useState(null);
 
   const loadPayments = async () => {
     if (!currentUser?.studentId) {
@@ -49,6 +51,20 @@ function StudentPayments() {
     }
   };
 
+  const openReceipt = (payment) => {
+    setReceiptPayment(payment);
+    setReceiptGeneratedAt(new Date());
+  };
+
+  const closeReceipt = () => {
+    setReceiptPayment(null);
+    setReceiptGeneratedAt(null);
+  };
+
+  const handlePrintReceipt = () => {
+    window.print();
+  };
+
   useEffect(() => {
     if (!loadingUser) {
       loadPayments();
@@ -70,6 +86,33 @@ function StudentPayments() {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const hasReceiptValue = (value) =>
+    value !== undefined && value !== null && value !== "";
+
+  const formatReceiptText = (value) =>
+    hasReceiptValue(value) ? String(value) : "N/A";
+
+  const formatReceiptCurrency = (amount) =>
+    hasReceiptValue(amount) ? formatCurrency(amount) : "N/A";
+
+  const formatPaymentMethod = (method) => {
+    if (!hasReceiptValue(method)) return "N/A";
+
+    const methodLabels = {
+      cash: "Cash",
+      gcash: "GCash",
+      card: "Card",
+    };
+
+    return methodLabels[method] || String(method);
+  };
+
+  const formatStatus = (status) => {
+    if (!hasReceiptValue(status)) return "N/A";
+
+    return String(status).charAt(0).toUpperCase() + String(status).slice(1);
   };
 
   const filteredPayments = payments
@@ -237,6 +280,16 @@ function StudentPayments() {
                     Pay Online
                   </button>
                 )}
+
+                {payment.status === "paid" && (
+                  <button
+                    className="student-view-receipt-btn"
+                    type="button"
+                    onClick={() => openReceipt(payment)}
+                  >
+                    View Receipt
+                  </button>
+                )}
               </div>
             </article>
           ))}
@@ -249,6 +302,109 @@ function StudentPayments() {
           )}
         </div>
       </section>
+
+      {receiptPayment && (
+        <Modal
+          title="Payment Receipt"
+          subtitle="Review this paid payment record before printing."
+          onClose={closeReceipt}
+        >
+          <section className="student-receipt-print-area">
+            <div className="student-receipt-header">
+              <div>
+                <p className="student-receipt-brand">PUPay</p>
+                <h3>Official Payment Receipt</h3>
+              </div>
+
+              <span className={`status-pill ${receiptPayment.status}`}>
+                {formatStatus(receiptPayment.status)}
+              </span>
+            </div>
+
+            <div className="student-receipt-grid">
+              <div>
+                <span>Student Name</span>
+                <strong>{formatReceiptText(currentUser?.fullName)}</strong>
+              </div>
+
+              <div>
+                <span>Student Number</span>
+                <strong>{formatReceiptText(currentUser?.studentNumber)}</strong>
+              </div>
+
+              <div>
+                <span>Collection Title</span>
+                <strong>{formatReceiptText(receiptPayment.collection_title)}</strong>
+              </div>
+
+              <div>
+                <span>Collection Description</span>
+                <strong>
+                  {formatReceiptText(receiptPayment.collection_description)}
+                </strong>
+              </div>
+
+              <div>
+                <span>Amount Due</span>
+                <strong>{formatReceiptCurrency(receiptPayment.amount_due)}</strong>
+              </div>
+
+              <div>
+                <span>Amount Paid</span>
+                <strong>{formatReceiptCurrency(receiptPayment.amount_paid)}</strong>
+              </div>
+
+              <div>
+                <span>Payment Method</span>
+                <strong>{formatPaymentMethod(receiptPayment.payment_method)}</strong>
+              </div>
+
+              <div>
+                <span>Reference Number</span>
+                <strong>{formatReceiptText(receiptPayment.reference_number)}</strong>
+              </div>
+
+              <div>
+                <span>Payment Status</span>
+                <strong>{formatStatus(receiptPayment.status)}</strong>
+              </div>
+
+              <div>
+                <span>Paid Date</span>
+                <strong>{formatDate(receiptPayment.paid_at)}</strong>
+              </div>
+
+              <div>
+                <span>Receipt Generated Date</span>
+                <strong>{formatDate(receiptGeneratedAt)}</strong>
+              </div>
+            </div>
+
+            <p className="student-receipt-note">
+              This receipt is generated from the payment record available in
+              PUPay Payment History.
+            </p>
+          </section>
+
+          <div className="student-receipt-actions">
+            <button
+              className="student-receipt-secondary-btn"
+              type="button"
+              onClick={closeReceipt}
+            >
+              Close
+            </button>
+
+            <button
+              className="student-receipt-print-btn"
+              type="button"
+              onClick={handlePrintReceipt}
+            >
+              Print Receipt
+            </button>
+          </div>
+        </Modal>
+      )}
     </main>
   );
 }
