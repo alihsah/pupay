@@ -19,10 +19,6 @@ function Landing() {
                 <p>Payment Tracking System</p>
               </div>
             </div>
-
-            <Link to="/sign-in" className="landing-login-btn">
-              Sign In
-            </Link>
           </nav>
 
           <section className="landing-hero single">
