@@ -1,6 +1,29 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
 
-function Unauthorized() {
+function NotFound() {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  const returnPath = isSignedIn ? "/dashboard" : "/";
+  const returnLabel = isSignedIn ? "Return to Dashboard" : "Return to Landing Page";
+
+  if (!isLoaded) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+          padding: "2rem",
+          background: "var(--color-bg)",
+          color: "var(--color-text)",
+        }}
+      >
+        <p>Loading...</p>
+      </main>
+    );
+  }
+
   return (
     <main
       style={{
@@ -15,7 +38,7 @@ function Unauthorized() {
       <section
         style={{
           width: "100%",
-          maxWidth: "460px",
+          maxWidth: "480px",
           padding: "2rem",
           borderRadius: "24px",
           background: "var(--color-surface)",
@@ -24,7 +47,17 @@ function Unauthorized() {
           textAlign: "center",
         }}
       >
-        <h1 style={{ marginBottom: "0.75rem" }}>Access Denied</h1>
+        <h1
+          style={{
+            marginBottom: "0.5rem",
+            fontSize: "3rem",
+            lineHeight: "1",
+          }}
+        >
+          404
+        </h1>
+
+        <h2 style={{ marginBottom: "0.75rem" }}>Page Not Found</h2>
 
         <p
           style={{
@@ -33,11 +66,11 @@ function Unauthorized() {
             lineHeight: "1.6",
           }}
         >
-          Your account is not allowed to access this page.
+          The page you are looking for does not exist or may have been moved.
         </p>
 
         <Link
-          to="/dashboard"
+          to={returnPath}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -50,11 +83,11 @@ function Unauthorized() {
             textDecoration: "none",
           }}
         >
-          Return to Dashboard
+          {returnLabel}
         </Link>
       </section>
     </main>
   );
 }
 
-export default Unauthorized;
+export default NotFound;

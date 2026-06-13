@@ -6,6 +6,7 @@ import Landing from "../pages/auth/Landing";
 import SignInPage from "../pages/auth/SignInPage";
 import SignUpPage from "../pages/auth/SignUpPage";
 import Unauthorized from "../pages/auth/Unauthorized";
+import NotFound from "../pages/auth/NotFound";
 
 import ClerkTokenProvider from "./ClerkTokenProvider";
 import ProtectedRoute from "./ProtectedRoute";
@@ -76,9 +77,13 @@ function AppRoutes() {
         <Route
           path="/admin/collections/:id"
           element={
-            <DashboardLayout>
-              <AdminCollectionDetails />
-            </DashboardLayout>
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["admin"]}>
+                <DashboardLayout>
+                  <AdminCollectionDetails />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
           }
         />
 
@@ -137,9 +142,13 @@ function AppRoutes() {
         <Route
           path="/admin/archives"
           element={
-            <DashboardLayout>
-              <AdminArchives />
-            </DashboardLayout>
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["admin"]}>
+                <DashboardLayout>
+                  <AdminArchives />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
           }
         />
 
@@ -233,6 +242,8 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </ClerkTokenProvider>
   );
