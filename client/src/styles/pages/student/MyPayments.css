@@ -209,21 +209,121 @@
   color: var(--color-text-muted);
 }
 
-.student-pay-online-btn {
+.student-pay-online-btn,
+.student-view-receipt-btn,
+.student-receipt-print-btn,
+.student-receipt-secondary-btn {
   width: 100%;
   border: none;
   border-radius: 14px;
   padding: 10px 14px;
-  margin-top: auto;
   font-weight: 700;
   cursor: pointer;
+}
+
+.student-pay-online-btn,
+.student-view-receipt-btn {
+  margin-top: auto;
+}
+
+.student-pay-online-btn,
+.student-receipt-print-btn {
   background: var(--color-primary);
   color: white;
   box-shadow: 0 12px 28px rgba(201, 24, 74, 0.18);
 }
 
-.student-pay-online-btn:hover {
+.student-view-receipt-btn,
+.student-receipt-secondary-btn {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.student-pay-online-btn:hover,
+.student-view-receipt-btn:hover,
+.student-receipt-print-btn:hover,
+.student-receipt-secondary-btn:hover {
   transform: translateY(-1px);
+}
+
+.student-receipt-print-area {
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 22px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.student-receipt-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.student-receipt-brand {
+  margin: 0 0 6px;
+  color: var(--color-primary);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.student-receipt-header h3 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.student-receipt-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.student-receipt-grid div {
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-soft);
+}
+
+.student-receipt-grid span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.student-receipt-grid strong {
+  display: block;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.student-receipt-note {
+  margin: 16px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.student-receipt-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.student-receipt-actions button {
+  width: auto;
+  min-width: 130px;
 }
 
 @media (max-width: 1100px) {
@@ -271,5 +371,85 @@
 
   .student-payment-footer {
     align-items: stretch;
+  }
+
+  .student-receipt-header,
+  .student-receipt-actions {
+    flex-direction: column;
+  }
+
+  .student-receipt-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-receipt-actions button {
+    width: 100%;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .modal-overlay,
+  .app-modal,
+  .student-receipt-print-area,
+  .student-receipt-print-area * {
+    visibility: visible !important;
+  }
+
+  .modal-overlay {
+    position: static !important;
+    display: block !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .app-modal {
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  .modal-header,
+  .student-receipt-actions {
+    display: none !important;
+  }
+
+  .student-receipt-print-area {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 24px !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+  }
+
+  .student-receipt-brand {
+    color: #c9184a !important;
+  }
+
+  .student-receipt-grid div {
+    background: #ffffff !important;
+    border-color: #d1d5db !important;
+  }
+
+  .student-receipt-grid span,
+  .student-receipt-note {
+    color: #4b5563 !important;
+  }
+
+  .student-receipt-grid strong,
+  .student-receipt-header h3 {
+    color: #111827 !important;
   }
 }
