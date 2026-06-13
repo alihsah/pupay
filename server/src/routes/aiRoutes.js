@@ -42,7 +42,7 @@ router.post(
   allowRoles("admin"),
   async (req, res) => {
     try {
-      const result = await generateAICollectionSummary(req.body);
+      const result = await generateAICollectionSummary(req.body || {});
 
       return res.status(200).json({
         success: true,
@@ -66,7 +66,7 @@ router.post(
   allowRoles("admin"),
   async (req, res) => {
     try {
-      const result = await generateAIAnnouncement(req.body);
+      const result = await generateAIAnnouncement(req.body || {});
 
       return res.status(200).json({
         success: true,

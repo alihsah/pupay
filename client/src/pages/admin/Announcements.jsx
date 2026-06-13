@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   createAnnouncement,
@@ -28,6 +29,9 @@ const emptyForm = {
 };
 
 function AdminAnnouncements() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [announcements, setAnnouncements] = useState([]);
   const [formData, setFormData] = useState(emptyForm);
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
@@ -67,6 +71,33 @@ function AdminAnnouncements() {
   useEffect(() => {
     loadAnnouncements(true);
   }, []);
+
+  useEffect(() => {
+    const aiDraft = location.state?.aiDraft;
+
+    if (!aiDraft) return;
+
+    const collection = location.state?.selectedCollection || {};
+
+    setFormData({
+      title: collection.title
+        ? `Payment Reminder: ${collection.title}`
+        : "Payment Reminder",
+      message: aiDraft,
+      type: "payment_reminder",
+      course: collection.course || "ALL",
+      year_level: collection.year_level || "ALL",
+      section: collection.section || "ALL",
+      status: "active",
+    });
+    setEditingAnnouncement(null);
+    setModalMode("create");
+    setShowModal(true);
+    setMessage("AI draft loaded. Review before creating the announcement.");
+    setMessageType("success");
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
