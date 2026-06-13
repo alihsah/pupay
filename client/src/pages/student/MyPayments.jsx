@@ -7,7 +7,7 @@ import { Toast } from "../../components/ui";
 import "../../styles/pages/student/MyPayments.css";
 
 function StudentPayments() {
-  const { currentUser, loading: userLoading } = useCurrentUser();
+  const { currentUser, loadingUser } = useCurrentUser();
 
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,11 +15,16 @@ function StudentPayments() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOption, setSortOption] = useState("due-soon");
 
   const loadPayments = async () => {
-    if (!currentUser?.studentId) return;
+    if (!currentUser?.studentId) {
+      setPayments([]);
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -45,10 +50,10 @@ function StudentPayments() {
   };
 
   useEffect(() => {
-    if (!userLoading && currentUser?.studentId) {
+    if (!loadingUser) {
       loadPayments();
     }
-  }, [userLoading, currentUser?.studentId]);
+  }, [loadingUser, currentUser?.studentId]);
 
   const formatCurrency = (amount) => {
     return Number(amount || 0).toLocaleString("en-PH", {
@@ -69,7 +74,16 @@ function StudentPayments() {
 
   const filteredPayments = payments
     .filter((payment) => {
-      return statusFilter === "all" || payment.status === statusFilter;
+      const searchValue = searchTerm.toLowerCase();
+      const matchesSearch =
+        !searchValue ||
+        payment.collection_title?.toLowerCase().includes(searchValue) ||
+        payment.collection_description?.toLowerCase().includes(searchValue);
+
+      const matchesStatus =
+        statusFilter === "all" || payment.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
       if (sortOption === "due-soon") {
@@ -92,7 +106,7 @@ function StudentPayments() {
   const pendingPayments = payments.filter((payment) => payment.status === "pending").length;
   const overduePayments = payments.filter((payment) => payment.status === "overdue").length;
 
-  if (userLoading || loading) {
+  if (loadingUser || loading) {
     return (
       <main className="student-payments-page">
         <p>Loading your payments...</p>
@@ -142,6 +156,16 @@ function StudentPayments() {
         </div>
 
         <div className="student-payments-toolbar">
+          <div className="filter-group search-group">
+            <label>Search</label>
+            <input
+              type="text"
+              placeholder="Search payments..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+          </div>
+
           <div className="filter-group">
             <label>Status</label>
             <select
@@ -171,15 +195,26 @@ function StudentPayments() {
         <div className="student-payment-list">
           {filteredPayments.map((payment) => (
             <article className="student-payment-item" key={payment.id}>
-              <div>
+              <div className="student-payment-main">
                 <h3>{payment.collection_title}</h3>
                 <p>{payment.collection_description || "No description provided."}</p>
               </div>
 
               <div className="student-payment-meta">
-                <span>Due: {formatDate(payment.due_date)}</span>
-                <span>Amount Due: {formatCurrency(payment.amount_due)}</span>
-                <span>Paid: {formatCurrency(payment.amount_paid)}</span>
+                <div>
+                  <span>Due Date</span>
+                  <strong>{formatDate(payment.due_date)}</strong>
+                </div>
+
+                <div>
+                  <span>Amount Due</span>
+                  <strong>{formatCurrency(payment.amount_due)}</strong>
+                </div>
+
+                <div>
+                  <span>Amount Paid</span>
+                  <strong>{formatCurrency(payment.amount_paid)}</strong>
+                </div>
               </div>
 
               <div className="student-payment-footer">
