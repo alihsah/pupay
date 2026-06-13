@@ -1,42 +1,25 @@
 import { useEffect, useState } from "react";
 
 import {
-  createPayment,
   getPayments,
   updatePaymentStatus,
 } from "../../services/paymentService";
 
-import { getStudents } from "../../services/studentService";
 import { getCollections } from "../../services/collectionService";
 
 import {
   PaymentFilters,
-  PaymentModal,
   PaymentStatusCard,
   PaymentTable,
+  PaymentStatusConfirmModal,
 } from "../../components/payments";
 
 import { Toast } from "../../components/ui";
 import "../../styles/pages/admin/Payments.css";
 
-const emptyPaymentForm = {
-  student_id: "",
-  collection_id: "",
-  amount_due: "",
-  amount_paid: 0,
-  status: "pending",
-  payment_method: "cash",
-  reference_number: "",
-  remarks: "",
-};
-
 function AdminPayments() {
   const [payments, setPayments] = useState([]);
-  const [students, setStudents] = useState([]);
   const [collections, setCollections] = useState([]);
-
-  const [formData, setFormData] = useState(emptyPaymentForm);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -49,6 +32,12 @@ function AdminPayments() {
   const [courseFilter, setCourseFilter] = useState("all");
   const [yearFilter, setYearFilter] = useState("all");
   const [sectionFilter, setSectionFilter] = useState("all");
+  const [collectionFilter, setCollectionFilter] = useState("all");
+
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [nextPaymentStatus, setNextPaymentStatus] = useState("");
+  const [confirmText, setConfirmText] = useState("");
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   const loadPageData = async (showPageLoading = true) => {
     try {
@@ -56,14 +45,12 @@ function AdminPayments() {
         setLoading(true);
       }
 
-      const [paymentData, studentData, collectionData] = await Promise.all([
+      const [paymentData, collectionData] = await Promise.all([
         getPayments(),
-        getStudents(),
         getCollections(),
       ]);
 
       setPayments(paymentData);
-      setStudents(studentData);
       setCollections(collectionData);
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to load payments.");
@@ -79,76 +66,45 @@ function AdminPayments() {
     loadPageData(true);
   }, []);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    if (name === "collection_id") {
-      const selectedCollection = collections.find(
-        (collection) => String(collection.id) === String(value)
-      );
-
-      setFormData((prev) => ({
-        ...prev,
-        collection_id: value,
-        amount_due: selectedCollection?.amount || prev.amount_due,
-      }));
-
-      return;
-    }
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
+   const openStatusConfirmModal = (payment, nextStatus) => {
+    setSelectedPayment(payment);
+    setNextPaymentStatus(nextStatus);
+    setConfirmText("");
   };
 
-  const resetForm = () => {
-    setFormData(emptyPaymentForm);
-    setShowPaymentModal(false);
+  const closeStatusConfirmModal = () => {
+    setSelectedPayment(null);
+    setNextPaymentStatus("");
+    setConfirmText("");
+    setIsUpdatingStatus(false);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleUpdateStatus = async () => {
+    if (!selectedPayment || !nextPaymentStatus) return;
 
     try {
-      const payload = {
-        ...formData,
-        student_id: Number(formData.student_id),
-        collection_id: Number(formData.collection_id),
-        amount_due: Number(formData.amount_due),
-        amount_paid: Number(formData.amount_paid || 0),
-      };
+      setIsUpdatingStatus(true);
 
-      await createPayment(payload);
-
-      setMessage("Payment record created successfully.");
-      setMessageType("success");
-
-      resetForm();
-      loadPageData(false);
-    } catch (error) {
-      setMessage(error.response?.data?.message || "Failed to create payment.");
-      setMessageType("error");
-    }
-  };
-
-  const handleUpdateStatus = async (payment, nextStatus) => {
-    try {
       const amountPaid =
-        nextStatus === "paid" ? payment.amount_due : payment.amount_paid || 0;
+        nextPaymentStatus === "paid" ? selectedPayment.amount_due : 0;
 
-      await updatePaymentStatus(payment.id, {
-        status: nextStatus,
+      await updatePaymentStatus(selectedPayment.id, {
+        status: nextPaymentStatus,
         amount_paid: Number(amountPaid),
-        payment_method: payment.payment_method || "cash",
-        reference_number: payment.reference_number || "",
-        remarks: payment.remarks || "",
+        payment_method: selectedPayment.payment_method || "cash",
+        reference_number: selectedPayment.reference_number || "",
+        remarks: selectedPayment.remarks || "",
       });
 
-      setMessage(`Payment marked as ${nextStatus}.`);
+      setMessage(`Payment marked as ${nextPaymentStatus}.`);
       setMessageType("success");
 
+      closeStatusConfirmModal();
       loadPageData(false);
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to update payment.");
       setMessageType("error");
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -180,6 +136,10 @@ function AdminPayments() {
         payment.collection_title?.toLowerCase().includes(searchValue) ||
         payment.reference_number?.toLowerCase().includes(searchValue);
 
+      const matchesCollection =
+      collectionFilter === "all" ||
+      String(payment.collection_id) === String(collectionFilter);
+
       const matchesStatus =
         statusFilter === "all" || payment.status === statusFilter;
 
@@ -197,6 +157,7 @@ function AdminPayments() {
 
       return (
         matchesSearch &&
+        matchesCollection &&
         matchesCourse &&
         matchesYear &&
         matchesSection &&
@@ -249,19 +210,14 @@ function AdminPayments() {
             <h2>Payment Records</h2>
             <p>Track student payments, pending balances, and overdue records.</p>
           </div>
-
-          <button
-            className="primary-btn"
-            type="button"
-            onClick={() => setShowPaymentModal(true)}
-          >
-            New Payment Record
-          </button>
         </div>
 
         <PaymentFilters
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          collections={collections}
+          collectionFilter={collectionFilter}
+          setCollectionFilter={setCollectionFilter}
           courseFilter={courseFilter}
           setCourseFilter={setCourseFilter}
           yearFilter={yearFilter}
@@ -281,23 +237,23 @@ function AdminPayments() {
         ) : (
           <PaymentTable
             payments={filteredPayments}
-            onUpdateStatus={handleUpdateStatus}
+            onUpdateStatus={openStatusConfirmModal}
             formatCurrency={formatCurrency}
             formatDate={formatDate}
           />
         )}
-      </section>
 
-      {showPaymentModal && (
-        <PaymentModal
-          formData={formData}
-          students={students}
-          collections={collections}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          onClose={resetForm}
+        <PaymentStatusConfirmModal
+          payment={selectedPayment}
+          nextStatus={nextPaymentStatus}
+          confirmText={confirmText}
+          setConfirmText={setConfirmText}
+          isUpdating={isUpdatingStatus}
+          onClose={closeStatusConfirmModal}
+          onConfirm={handleUpdateStatus}
+          formatCurrency={formatCurrency}
         />
-      )}
+      </section>
     </main>
   );
 }

@@ -1,5 +1,6 @@
+import { useLocation, useNavigate } from "react-router-dom";
+
 import { Search, Bell } from "lucide-react";
-import { useLocation } from "react-router-dom";
 import { UserButton } from "@clerk/clerk-react";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import "../../styles/components/layout/Topbar.css";
@@ -56,7 +57,10 @@ const pageTitles = {
 };
 
 function Topbar() {
+  const navigate = useNavigate();
   const location = useLocation();
+
+  const isStudentPortal = location.pathname.startsWith("/student");
   const { currentUser } = useCurrentUser();
 
   const currentPage = pageTitles[location.pathname] || {
@@ -72,19 +76,14 @@ function Topbar() {
       </div>
 
       <div className="topbar-actions">
-        <div className="topbar-search is-disabled" aria-disabled="true">
-          <Search size={18} />
-          <input
-            type="text"
-            placeholder="Search is unavailable"
-            disabled
-            tabIndex="-1"
-          />
-        </div>
-
-        <button className="topbar-icon-btn" type="button">
-          <Bell size={20} />
-        </button>
+        {isStudentPortal && (
+          <button className="topbar-icon-btn" type="button"
+            onClick={() => navigate("/student/notifications")}
+            aria-label="Open notifications">
+            <Bell size={20} />
+          </button>
+        )}
+       
 
         <div className="topbar-user topbar-user-avatar-only">
           <UserButton afterSignOutUrl="/" />

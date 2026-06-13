@@ -1,6 +1,9 @@
 function PaymentFilters({
   searchTerm,
   setSearchTerm,
+  collections = [],
+  collectionFilter,
+  setCollectionFilter,
   courseFilter,
   setCourseFilter,
   yearFilter,
@@ -28,6 +31,22 @@ function PaymentFilters({
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
         />
+      </div>
+
+      <div className="filter-group">
+        <label>Collection</label>
+        <select
+          value={collectionFilter}
+          onChange={(event) => setCollectionFilter(event.target.value)}
+        >
+          <option value="all">All Collections</option>
+
+          {collections.map((collection) => (
+            <option key={collection.id} value={collection.id}>
+              {collection.title}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="payments-filters-row">

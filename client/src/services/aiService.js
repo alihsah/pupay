@@ -1,64 +1,16 @@
-// ========================================
-// FUTURE API SERVICE
-// Handles AI-related API requests
-// ========================================
+import api from "./api";
 
-// POST /api/ai/generate-reminder
-export async function generateReminder(promptData) {
-  // const response = await fetch("/api/ai/generate-reminder", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(promptData),
-  // });
-  // return response.json();
+export const generateAIReminder = async (payload) => {
+  const response = await api.post("/ai/reminder", payload);
+  return response.data;
+};
 
-  return {
-    result:
-      "Good day, students. This is a friendly reminder to settle your payment before the due date. Thank you.",
-  };
-}
+export const generateAICollectionSummary = async (payload) => {
+  const response = await api.post("/ai/collection-summary", payload);
+  return response.data;
+};
 
-// POST /api/ai/generate-summary
-export async function generateSummary(collectionData) {
-  // const response = await fetch("/api/ai/generate-summary", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(collectionData),
-  // });
-  // return response.json();
-
-  return {
-    result:
-      "Most students have already paid, but there are still some pending payments that need follow-up.",
-  };
-}
-
-// POST /api/ai/generate-insights
-export async function generateInsights(paymentData) {
-  // const response = await fetch("/api/ai/generate-insights", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(paymentData),
-  // });
-  // return response.json();
-
-  return {
-    result:
-      "Consider sending a reminder because several students still have pending payments.",
-  };
-}
-
-// POST /api/ai/generate-announcement
-export async function generateAnnouncement(announcementData) {
-  // const response = await fetch("/api/ai/generate-announcement", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(announcementData),
-  // });
-  // return response.json();
-
-  return {
-    result:
-      "The payment collection is now open. Please settle your contribution before the deadline.",
-  };
-}
+export const generateAIAnnouncement = async (payload) => {
+  const response = await api.post("/ai/announcement", payload);
+  return response.data;
+};

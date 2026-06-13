@@ -44,6 +44,8 @@ function Students() {
   const [isSubmittingStudent, setIsSubmittingStudent] = useState(false);
   const [isImportingStudents, setIsImportingStudents] = useState(false);
 
+  const [isUpdatingStudent, setIsUpdatingStudent] = useState(false);
+
   const loadStudents = async (showPageLoading = true) => {
     try {
       if (showPageLoading) {
@@ -159,6 +161,8 @@ function Students() {
     if (!editingStudent) return;
 
     try {
+      setIsUpdatingStudent(true);
+
       await updateStudent(editingStudent.id, editFormData);
 
       setMessage("Student updated successfully.");
@@ -172,6 +176,8 @@ function Students() {
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to update student.");
       setMessageType("error");
+    } finally {
+      setIsUpdatingStudent(false);
     }
   };
 
@@ -499,8 +505,12 @@ function Students() {
                 Cancel
               </button>
 
-              <button className="primary-btn" type="submit">
-                Save Changes
+              <button
+                className="primary-btn"
+                type="submit"
+                disabled={isUpdatingStudent}
+              >
+                {isUpdatingStudent ? "Updating..." : "Save Changes"}
               </button>
             </div>
           </form>

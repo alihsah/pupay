@@ -18,11 +18,14 @@ import AdminCollectionDetails from "../pages/admin/CollectionDetails";
 import AdminPayments from "../pages/admin/Payments";
 import AdminStudents from "../pages/admin/Students";
 import AdminAnnouncements from "../pages/admin/Announcements";
+import AIHelper from "../pages/admin/AIHelper";
+import AdminArchives from "../pages/admin/Archives";
 import AdminSettings from "../pages/admin/Settings";
 
 import StudentDashboard from "../pages/student/Dashboard";
 import StudentCollections from "../pages/student/MyCollections";
 import StudentPayments from "../pages/student/MyPayments";
+import StudentNotifications from "../pages/student/Notifications";
 import StudentAnnouncements from "../pages/student/Announcements";
 import StudentProfile from "../pages/student/Profile";
 
@@ -106,6 +109,19 @@ function AppRoutes() {
         />
 
         <Route
+          path="/admin/ai-helper"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["admin"]}>
+                <DashboardLayout>
+                  <AIHelper />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/admin/announcements"
           element={
             <ProtectedRoute>
@@ -115,6 +131,15 @@ function AppRoutes() {
                 </DashboardLayout>
               </RoleRoute>
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/archives"
+          element={
+            <DashboardLayout>
+              <AdminArchives />
+            </DashboardLayout>
           }
         />
 
@@ -167,6 +192,15 @@ function AppRoutes() {
                 </DashboardLayout>
               </RoleRoute>
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/notifications"
+          element={
+            <DashboardLayout>
+              <StudentNotifications />
+            </DashboardLayout>
           }
         />
 

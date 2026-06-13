@@ -309,26 +309,133 @@ export const createCollection = async (req, res) => {
 };
 
 export const updateCollection = async (req, res) => {
+  const connection = await db.getConnection();
+
   try {
     const { id } = req.params;
 
     const {
       title,
       description,
-      amount,
-      course,
-      year_level,
-      section,
+      goal_amount,
+      course = "ALL",
+      year_level = "ALL",
+      section = "ALL",
       due_date,
-      status,
+      status = "active",
     } = req.body;
 
-    await db.query(
+    if (!title || !goal_amount || !due_date) {
+      return res.status(400).json({
+        message: "Title, target amount, and due date are required.",
+      });
+    }
+
+    const finalGoalAmount = Number(goal_amount);
+
+    if (Number.isNaN(finalGoalAmount) || finalGoalAmount <= 0) {
+      return res.status(400).json({
+        message: "Target amount must be greater than zero.",
+      });
+    }
+
+    await connection.beginTransaction();
+
+    const [existingCollections] = await connection.query(
+      `
+      SELECT
+        id,
+        course,
+        year_level,
+        section
+      FROM collections
+      WHERE id = ?
+      `,
+      [id]
+    );
+
+    if (existingCollections.length === 0) {
+      await connection.rollback();
+
+      return res.status(404).json({
+        message: "Collection not found.",
+      });
+    }
+
+    const existingCollection = existingCollections[0];
+
+    const [paidRows] = await connection.query(
+      `
+      SELECT COUNT(*) AS paid_count
+      FROM payments
+      WHERE collection_id = ?
+        AND status = 'paid'
+      `,
+      [id]
+    );
+
+    const paidCount = Number(paidRows[0].paid_count || 0);
+
+    const targetChanged =
+      existingCollection.course !== course ||
+      existingCollection.year_level !== year_level ||
+      existingCollection.section !== section;
+
+    if (paidCount > 0 && targetChanged) {
+      await connection.rollback();
+
+      return res.status(400).json({
+        message:
+          "You cannot change the target audience after students have already paid.",
+      });
+    }
+
+    const studentFilters = ["status = 'active'"];
+    const studentValues = [];
+
+    if (course !== "ALL") {
+      studentFilters.push("course = ?");
+      studentValues.push(course);
+    }
+
+    if (year_level !== "ALL") {
+      studentFilters.push("year_level = ?");
+      studentValues.push(year_level);
+    }
+
+    if (section !== "ALL") {
+      studentFilters.push("section = ?");
+      studentValues.push(section);
+    }
+
+    const [students] = await connection.query(
+      `
+      SELECT id
+      FROM students
+      WHERE ${studentFilters.join(" AND ")}
+      `,
+      studentValues
+    );
+
+    if (students.length === 0) {
+      await connection.rollback();
+
+      return res.status(400).json({
+        message: "No active students match this collection target.",
+      });
+    }
+
+    const studentContribution = Number(
+      (finalGoalAmount / students.length).toFixed(2)
+    );
+
+    await connection.query(
       `
       UPDATE collections
       SET
         title = ?,
         description = ?,
+        goal_amount = ?,
         amount = ?,
         course = ?,
         year_level = ?,
@@ -340,7 +447,8 @@ export const updateCollection = async (req, res) => {
       [
         title,
         description || null,
-        amount,
+        finalGoalAmount,
+        studentContribution,
         course,
         year_level,
         section,
@@ -350,10 +458,104 @@ export const updateCollection = async (req, res) => {
       ]
     );
 
-    res.status(200).json({ message: "Collection updated successfully." });
+    if (paidCount === 0) {
+      await connection.query(
+        `
+        DELETE FROM payments
+        WHERE collection_id = ?
+        `,
+        [id]
+      );
+
+      const paymentValues = students.map((student) => [
+        student.id,
+        id,
+        studentContribution,
+        0,
+        "pending",
+        "cash",
+      ]);
+
+      await connection.query(
+        `
+        INSERT INTO payments (
+          student_id,
+          collection_id,
+          amount_due,
+          amount_paid,
+          status,
+          payment_method
+        )
+        VALUES ?
+        `,
+        [paymentValues]
+      );
+    } else {
+      await connection.query(
+        `
+        UPDATE payments
+        SET amount_due = ?
+        WHERE collection_id = ?
+          AND status IN ('pending', 'overdue')
+        `,
+        [studentContribution, id]
+      );
+    }
+
+    const [totals] = await connection.query(
+      `
+      SELECT COALESCE(SUM(amount_paid), 0) AS total_collected
+      FROM payments
+      WHERE collection_id = ?
+      `,
+      [id]
+    );
+
+    const totalCollected = Number(totals[0].total_collected || 0);
+
+    if (totalCollected >= finalGoalAmount) {
+      await connection.query(
+        `
+        UPDATE collections
+        SET
+          is_locked = TRUE,
+          locked_at = COALESCE(locked_at, NOW()),
+          status = IF(status = 'archived', 'archived', 'closed')
+        WHERE id = ?
+        `,
+        [id]
+      );
+    } else {
+      await connection.query(
+        `
+        UPDATE collections
+        SET
+          is_locked = FALSE,
+          locked_at = NULL
+        WHERE id = ?
+        `,
+        [id]
+      );
+    }
+
+    await connection.commit();
+
+    res.status(200).json({
+      message: "Collection updated successfully.",
+      goalAmount: finalGoalAmount,
+      studentContribution,
+      assignedStudents: students.length,
+    });
   } catch (error) {
+    await connection.rollback();
+
     console.error("Update collection error:", error);
-    res.status(500).json({ message: "Failed to update collection." });
+
+    res.status(500).json({
+      message: "Failed to update collection.",
+    });
+  } finally {
+    connection.release();
   }
 };
 
