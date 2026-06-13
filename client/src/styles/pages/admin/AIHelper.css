@@ -523,9 +523,41 @@
 }
 
 @media (max-width: 720px) {
+  .ai-helper-page {
+    gap: 1rem;
+  }
+
   .ai-helper-hero {
+    padding: 1rem;
+    border-radius: 18px;
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .ai-helper-hero h2 {
+    font-size: 1.35rem;
+  }
+
+  .ai-helper-hero-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+  }
+
+  .ai-helper-control-panel,
+  .ai-helper-tools-panel,
+  .ai-helper-output-panel,
+  .ai-helper-tool-config,
+  .ai-helper-collection-card,
+  .ai-helper-progress-box {
+    border-radius: 18px;
+  }
+
+  .ai-helper-control-panel,
+  .ai-helper-tools-panel,
+  .ai-helper-output-panel,
+  .ai-helper-tool-config {
+    padding: 1rem;
   }
 
   .ai-helper-options-grid,
@@ -533,7 +565,21 @@
     grid-template-columns: 1fr;
   }
 
+  .ai-helper-tool-tabs {
+    border-radius: 16px;
+  }
+
+  .ai-helper-tool-tabs button {
+    min-height: 42px;
+  }
+
   .ai-helper-output-header {
     flex-direction: column;
+  }
+
+  .ai-helper-copy-btn,
+  .ai-helper-use-btn,
+  .ai-helper-generate-btn {
+    width: 100%;
   }
 }

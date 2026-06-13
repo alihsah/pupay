@@ -165,11 +165,33 @@
 }
 
 @media (max-width: 700px) {
+  .student-notifications-page {
+    gap: 16px;
+  }
+
+  .student-notifications-panel,
+  .student-notification-card {
+    border-radius: 18px;
+    padding: 16px;
+  }
+
+  .student-notifications-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+
+  .student-notifications-toolbar {
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
   .student-notification-filters {
     grid-template-columns: 1fr;
   }
 
   .student-notification-card-main {
     flex-direction: column;
+    gap: 12px;
   }
 }

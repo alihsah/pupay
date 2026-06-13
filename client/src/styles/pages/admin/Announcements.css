@@ -246,14 +246,32 @@
 }
 
 @media (max-width: 640px) {
+  .announcements-page {
+    gap: 16px;
+  }
+
   .announcements-summary-grid,
   .announcements-filters-row,
   .announcements-form {
     grid-template-columns: 1fr;
   }
 
+  .announcement-summary-card,
+  .announcements-panel {
+    border-radius: 18px;
+    padding: 16px;
+  }
+
+  .announcement-summary-card strong {
+    font-size: 1.55rem;
+  }
+
   .announcements-panel-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .announcements-actions button {
+    flex: 1 1 110px;
   }
 }

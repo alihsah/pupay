@@ -150,8 +150,8 @@ function StudentPayments() {
       <section className="student-payments-panel">
         <div className="student-payments-header">
           <div>
-            <h2>My Payments</h2>
-            <p>View your assigned collections and payment status.</p>
+            <h2>Payment History</h2>
+            <p>Review your payment records, status, and transaction history.</p>
           </div>
         </div>
 

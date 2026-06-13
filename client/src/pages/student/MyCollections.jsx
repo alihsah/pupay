@@ -28,6 +28,7 @@ function StudentCollections() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("due-soon");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const loadCollections = async () => {
     try {
@@ -142,30 +143,45 @@ function StudentCollections() {
     return Math.max(amountDue - amountPaid, 0);
   };
 
+  const getCollectionDisplayStatus = (collection) => {
+    const progress = collectionProgress[collection.id];
+    const payment = paymentsByCollection[collection.id];
+    const isLocked = progress?.isLocked || collection.is_locked;
+
+    return payment?.status || (isLocked ? "locked" : collection.status);
+  };
+
   const filteredCollections = collections
-    .filter((collection) => {
-      const searchValue = searchTerm.toLowerCase();
+  .filter((collection) => {
+    const searchValue = searchTerm.toLowerCase();
 
-      return (
-        collection.title?.toLowerCase().includes(searchValue) ||
-        collection.description?.toLowerCase().includes(searchValue)
-      );
-    })
-    .sort((a, b) => {
-      if (sortOption === "title-az") {
-        return a.title.localeCompare(b.title);
-      }
+    const matchesSearch =
+      !searchValue ||
+      collection.title?.toLowerCase().includes(searchValue) ||
+      collection.description?.toLowerCase().includes(searchValue);
 
-      if (sortOption === "title-za") {
-        return b.title.localeCompare(a.title);
-      }
+    const displayStatus = getCollectionDisplayStatus(collection);
 
-      if (sortOption === "newest") {
-        return new Date(b.created_at) - new Date(a.created_at);
-      }
+    const matchesStatus =
+      statusFilter === "all" || displayStatus === statusFilter;
 
-      return new Date(a.due_date) - new Date(b.due_date);
-    });
+    return matchesSearch && matchesStatus;
+  })
+  .sort((a, b) => {
+    if (sortOption === "title-az") {
+      return a.title.localeCompare(b.title);
+    }
+
+    if (sortOption === "title-za") {
+      return b.title.localeCompare(a.title);
+    }
+
+    if (sortOption === "newest") {
+      return new Date(b.created_at) - new Date(a.created_at);
+    }
+
+    return new Date(a.due_date) - new Date(b.due_date);
+  });
 
   const totalCollections = collections.length;
   const upcomingCollections = collections.filter(
@@ -225,6 +241,21 @@ function StudentCollections() {
           </div>
 
           <div className="filter-group">
+            <label>Status</label>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+              <option value="active">Active</option>
+              <option value="locked">Locked</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
             <label>Sort By</label>
             <select
               value={sortOption}
@@ -245,8 +276,7 @@ function StudentCollections() {
             {filteredCollections.map((collection) => {
               const progress = collectionProgress[collection.id];
               const payment = paymentsByCollection[collection.id];
-              const isLocked = progress?.isLocked || collection.is_locked;
-              const displayStatus = payment?.status || (isLocked ? "locked" : collection.status);
+              const displayStatus = getCollectionDisplayStatus(collection);
               const progressValue = getProgressValue(progress);
               const progressGoal = getProgressGoal(collection, progress);
               const hasProgressGoal = progressGoal > 0;

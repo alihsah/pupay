@@ -125,21 +125,21 @@
 
 @media (max-width: 768px) {
   .sidebar {
-    width: calc(100% - 24px);
+    width: calc(100% - 20px);
     min-height: auto;
-    height: 70px;
-    left: 12px;
+    height: 64px;
+    left: 10px;
     top: auto;
-    bottom: 12px;
-    border-radius: var(--radius-xl);
-    padding: 10px;
+    bottom: 10px;
+    border-radius: 20px;
+    padding: 8px;
     flex-direction: row;
     align-items: center;
     box-shadow: var(--shadow-md);
   }
 
   .sidebar:hover {
-    width: calc(100% - 24px);
+    width: calc(100% - 20px);
   }
 
   .sidebar-logo,
@@ -155,9 +155,11 @@
   }
 
   .sidebar-link {
+    flex: 1 1 0;
     justify-content: center;
     padding: 0;
-    min-height: 48px;
+    min-height: 46px;
+    border-radius: 14px;
   }
 
   .sidebar-link span {

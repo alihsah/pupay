@@ -238,16 +238,35 @@
 }
 
 @media (max-width: 640px) {
+  .student-payments-page {
+    gap: 16px;
+  }
+
   .student-payment-summary-grid,
   .student-payments-toolbar,
   .student-payment-meta {
     grid-template-columns: 1fr;
   }
 
+  .student-payments-toolbar {
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
   .student-payments-panel,
   .student-payment-card,
   .student-payment-item {
     border-radius: 18px;
+  }
+
+  .student-payments-panel,
+  .student-payment-card,
+  .student-payment-item {
+    padding: 16px;
+  }
+
+  .student-payment-card strong {
+    font-size: 1.55rem;
   }
 
   .student-payment-footer {
