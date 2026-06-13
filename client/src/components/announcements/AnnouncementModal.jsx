@@ -10,6 +10,7 @@ function AnnouncementModal({
   onChange,
   onSubmit,
   onClose,
+  isSubmitting = false,
 }) {
   const isEdit = mode === "edit";
 
@@ -102,8 +103,18 @@ function AnnouncementModal({
             Cancel
           </button>
 
-          <button className="primary-btn" type="submit">
-            {isEdit ? "Save Changes" : "Create Announcement"}
+          <button
+            className="primary-btn"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting
+              ? isEdit
+                ? "Updating..."
+                : "Creating..."
+              : isEdit
+                ? "Save Changes"
+                : "Create Announcement"}
           </button>
         </div>
       </form>

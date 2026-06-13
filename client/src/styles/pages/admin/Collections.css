@@ -505,6 +505,48 @@
   line-height: 1.4;
 }
 
+.collection-confirm-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.collection-confirm-warning {
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface-soft);
+}
+
+.collection-confirm-warning strong {
+  display: block;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.collection-confirm-warning p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.collection-confirm-content input {
+  width: 100%;
+  min-height: 54px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.collection-confirm-content input:focus {
+  outline: none;
+  border-color: rgba(201, 24, 74, 0.45);
+  box-shadow: 0 0 0 4px rgba(201, 24, 74, 0.08);
+}
+
 @media (max-width: 1100px) {
   .admin-collections-card-grid {
     grid-template-columns: 1fr;

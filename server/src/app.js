@@ -7,6 +7,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import collectionRoutes from "./routes/collectionRoutes.js";
 import announcementRoutes from "./routes/announcementRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 
 const app = express();
 
@@ -21,6 +22,8 @@ app.use(
     },
   })
 );
+
+app.use("/api/ai", aiRoutes);
 
 app.use(clerkMiddleware());
 

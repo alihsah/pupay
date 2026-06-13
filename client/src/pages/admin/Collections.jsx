@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CollectionCard from "../../components/collections/CollectionCard";
 import CreateCollectionModal from "../../components/collections/CreateCollectionModal";
+import CollectionActionConfirmModal from "../../components/collections/CollectionActionConfirmModal";
+
 import {
   createCollection,
   getCollections,
@@ -11,7 +13,7 @@ import {
 } from "../../services/collectionService";
 
 import Modal from "../../components/ui/Modal";
-import PageAlert from "../../components/ui/PageAlert";
+import Toast from "../../components/ui/Toast";
 
 import "../../styles/pages/admin/Collections.css";
 
@@ -44,6 +46,8 @@ function AdminCollections() {
   const [editFormData, setEditFormData] = useState(emptyCollectionForm);
 
   const [loading, setLoading] = useState(true);
+  const [isCreatingCollection, setIsCreatingCollection] = useState(false);
+  const [isUpdatingCollection, setIsUpdatingCollection] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
 
@@ -53,6 +57,11 @@ function AdminCollections() {
   const [sectionFilter, setSectionFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
+
+  const [selectedCollectionAction, setSelectedCollectionAction] = useState(null);
+  const [nextCollectionStatus, setNextCollectionStatus] = useState("");
+  const [collectionConfirmText, setCollectionConfirmText] = useState("");
+  const [isUpdatingCollectionStatus, setIsUpdatingCollectionStatus] = useState(false);
 
   const loadCollections = async (showPageLoading = true) => {
     try {
@@ -103,35 +112,13 @@ function AdminCollections() {
     setEditFormData(emptyCollectionForm);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    try {
-      const payload = {
-        ...formData,
-        goal_amount: Number(formData.goal_amount),
-      };
-
-      await createCollection(payload);
-
-      setMessage("Collection created successfully.");
-      setMessageType("success");
-
-      resetForm();
-      loadCollections(false);
-    } catch (error) {
-      setMessage(error.response?.data?.message || "Failed to create collection.");
-      setMessageType("error");
-    }
-  };
-
   const handleEdit = (collection) => {
     setEditingCollection(collection);
 
     setEditFormData({
       title: collection.title || "",
       description: collection.description || "",
-      amount: collection.amount || "",
+      goal_amount: collection.goal_amount || "",
       course: collection.course || "ALL",
       year_level: collection.year_level || "ALL",
       section: collection.section || "ALL",
@@ -148,9 +135,11 @@ function AdminCollections() {
     if (!editingCollection) return;
 
     try {
+      setIsUpdatingCollection(true);
+
       const payload = {
         ...editFormData,
-        amount: Number(editFormData.amount),
+        goal_amount: Number(editFormData.goal_amount),
       };
 
       await updateCollection(editingCollection.id, payload);
@@ -166,19 +155,66 @@ function AdminCollections() {
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to update collection.");
       setMessageType("error");
+    } finally {
+      setIsUpdatingCollection(false);
     }
+  };
+
+  const openCollectionActionConfirm = (collection, nextStatus) => {
+    if (nextStatus === "archived") {
+      setSelectedCollectionAction(collection);
+      setNextCollectionStatus("archive");
+      setCollectionConfirmText("");
+      return;
+    }
+
+    if (nextStatus === "closed") {
+      setSelectedCollectionAction(collection);
+      setNextCollectionStatus("close");
+      setCollectionConfirmText("");
+      return;
+    }
+
+    handleStatusChange(collection, nextStatus);
+  };
+
+  const closeCollectionActionConfirm = () => {
+    setSelectedCollectionAction(null);
+    setNextCollectionStatus("");
+    setCollectionConfirmText("");
+    setIsUpdatingCollectionStatus(false);
   };
 
   const handleStatusChange = async (collection, nextStatus) => {
     try {
+      setIsUpdatingCollectionStatus(true);
+
       await updateCollectionStatus(collection.id, nextStatus);
+
       setMessage(`Collection marked as ${nextStatus}.`);
       setMessageType("success");
+
+      closeCollectionActionConfirm();
       loadCollections(false);
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to update status.");
       setMessageType("error");
+      setIsUpdatingCollectionStatus(false);
     }
+  };
+
+  const handleConfirmCollectionAction = async () => {
+    if (!selectedCollectionAction || !nextCollectionStatus) return;
+
+    const statusMap = {
+      close: "closed",
+      archive: "archived",
+    };
+
+    await handleStatusChange(
+      selectedCollectionAction,
+      statusMap[nextCollectionStatus]
+    );
   };
 
   const formatAudience = (collection) => {
@@ -271,6 +307,14 @@ function AdminCollections() {
 
   return (
     <main className="collections-page">
+      <Toast
+        message={message}
+        type={messageType}
+        onClose={() => {
+          setMessage("");
+          setMessageType("");
+        }}
+      />
       <section className="collections-summary-grid">
         <article className="collection-summary-card">
           <span>Total Collections</span>
@@ -294,42 +338,20 @@ function AdminCollections() {
       </section>
 
       <section className="collections-panel">
-        <div className="collections-panel-header">
-          <div>
-            <h2>Create Collection</h2>
-            <p>Create and manage payment collections for specific student groups.</p>
-          </div>
-
-          <div className="header-actions">
-            {!editingCollection && (
-              <button
-                className="primary-btn"
-                type="button"
-                onClick={() => setShowCollectionForm(true)}
-              >
-                New Collection
-              </button>
-            )}
-          </div>
-        </div>
-
-        <PageAlert message={message} type={messageType} />
-        
-        {showCollectionForm && (
-          <CreateCollectionModal
-            formData={formData}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            onClose={resetForm}
-          />
-        )}
-      </section>
-
-      <section className="collections-panel">
-        <div className="collections-panel-header">
+       <div className="collections-panel-header">
           <div>
             <h2>Collection Records</h2>
             <p>Track active, closed, and archived payment collections.</p>
+          </div>
+
+          <div className="header-actions">
+            <button
+              className="primary-btn"
+              type="button"
+              onClick={() => setShowCollectionForm(true)}
+            >
+              New Collection
+            </button>
           </div>
         </div>
 
@@ -432,7 +454,7 @@ function AdminCollections() {
                 progress={collectionProgress[collection.id]}
                 onOpen={() => navigate(`/admin/collections/${collection.id}`)}
                 onEdit={() => handleEdit(collection)}
-                onStatusChange={handleStatusChange}
+                onStatusChange={openCollectionActionConfirm}
                 formatCurrency={formatCurrency}
                 formatDate={formatDate}
                 formatAudience={formatAudience}
@@ -448,6 +470,16 @@ function AdminCollections() {
           </div>
         )}
       </section>
+
+      {showCollectionForm && (
+        <CreateCollectionModal
+          formData={formData}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          onClose={resetForm}
+          isCreating={isCreatingCollection}
+        />
+      )}
 
       {showEditModal && (
         <Modal
@@ -468,12 +500,12 @@ function AdminCollections() {
             </div>
 
             <div className="form-group">
-              <label>Amount</label>
+              <label>Target Amount</label>
               <input
-                name="amount"
-                value={editFormData.amount}
+                name="goal_amount"
+                value={editFormData.goal_amount}
                 onChange={handleEditChange}
-                placeholder="Example: 100"
+                placeholder="Example: 3000"
                 type="number"
                 min="1"
                 required
@@ -561,17 +593,36 @@ function AdminCollections() {
             </div>
 
             <div className="modal-actions">
-              <button className="secondary-btn" type="button" onClick={resetForm}>
+              <button
+                className="secondary-btn"
+                type="button"
+                onClick={resetForm}
+                disabled={isUpdatingCollection}
+              >
                 Cancel
               </button>
 
-              <button className="primary-btn" type="submit">
-                Save Changes
+              <button
+                className="primary-btn"
+                type="submit"
+                disabled={isUpdatingCollection}
+              >
+                {isUpdatingCollection ? "Updating..." : "Save Changes"}
               </button>
             </div>
           </form>
         </Modal>
       )}
+
+      <CollectionActionConfirmModal
+        collection={selectedCollectionAction}
+        action={nextCollectionStatus}
+        confirmText={collectionConfirmText}
+        setConfirmText={setCollectionConfirmText}
+        isUpdating={isUpdatingCollectionStatus}
+        onClose={closeCollectionActionConfirm}
+        onConfirm={handleConfirmCollectionAction}
+      />
     </main>
   );
 };

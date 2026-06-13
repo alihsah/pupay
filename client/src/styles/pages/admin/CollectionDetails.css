@@ -150,20 +150,27 @@
   color: var(--color-text-muted);
 }
 
-.collection-payment-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.collection-payment-actions button {
+.collection-payment-status-select {
+  width: 150px;
+  padding: 9px 10px;
   border: 1px solid var(--color-border);
+  border-radius: 12px;
   background: var(--color-surface);
   color: var(--color-text);
-  border-radius: 10px;
-  padding: 8px 10px;
-  cursor: pointer;
+  font: inherit;
+  font-size: 0.88rem;
   font-weight: 600;
+  cursor: pointer;
+}
+
+.collection-payment-status-select:hover {
+  border-color: rgba(201, 24, 74, 0.35);
+}
+
+.collection-payment-status-select:focus {
+  outline: none;
+  border-color: rgba(201, 24, 74, 0.45);
+  box-shadow: 0 0 0 4px rgba(201, 24, 74, 0.08);
 }
 
 .status-pill {

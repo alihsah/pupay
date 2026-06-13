@@ -36,6 +36,8 @@ function AdminAnnouncements() {
   const [modalMode, setModalMode] = useState("create");
 
   const [loading, setLoading] = useState(true);
+  const [isCreatingAnnouncement, setIsCreatingAnnouncement] = useState(false);
+  const [isUpdatingAnnouncement, setIsUpdatingAnnouncement] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
 
@@ -44,21 +46,26 @@ function AdminAnnouncements() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
 
-  const loadAnnouncements = async () => {
+  const loadAnnouncements = async (showPageLoading = true) => {
     try {
-      setLoading(true);
+      if (showPageLoading) {
+        setLoading(true);
+      }
+
       const data = await getAnnouncements();
       setAnnouncements(data);
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to load announcements.");
       setMessageType("error");
     } finally {
-      setLoading(false);
+      if (showPageLoading) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadAnnouncements();
+    loadAnnouncements(true);
   }, []);
 
   const handleChange = (event) => {
@@ -100,19 +107,29 @@ function AdminAnnouncements() {
 
     try {
       if (modalMode === "edit" && editingAnnouncement) {
+        setIsUpdatingAnnouncement(true);
+
         await updateAnnouncement(editingAnnouncement.id, formData);
+
         setMessage("Announcement updated successfully.");
+        setMessageType("success");
       } else {
+        setIsCreatingAnnouncement(true);
+
         await createAnnouncement(formData);
+
         setMessage("Announcement created successfully.");
+        setMessageType("success");
       }
 
-      setMessageType("success");
       resetModal();
-      loadAnnouncements();
+      loadAnnouncements(false);
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to save announcement.");
       setMessageType("error");
+    } finally {
+      setIsCreatingAnnouncement(false);
+      setIsUpdatingAnnouncement(false);
     }
   };
 
@@ -121,7 +138,7 @@ function AdminAnnouncements() {
       await updateAnnouncementStatus(announcement.id, "archived");
       setMessage("Announcement archived successfully.");
       setMessageType("success");
-      loadAnnouncements();
+      loadAnnouncements(false);
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to archive announcement.");
       setMessageType("error");
@@ -133,7 +150,7 @@ function AdminAnnouncements() {
       await updateAnnouncementStatus(announcement.id, "active");
       setMessage("Announcement restored successfully.");
       setMessageType("success");
-      loadAnnouncements();
+      loadAnnouncements(false);
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to restore announcement.");
       setMessageType("error");
@@ -267,6 +284,11 @@ function AdminAnnouncements() {
           onChange={handleChange}
           onSubmit={handleSubmit}
           onClose={resetModal}
+          isSubmitting={
+            modalMode === "edit"
+              ? isUpdatingAnnouncement
+              : isCreatingAnnouncement
+          }
         />
       )}
     </main>

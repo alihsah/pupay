@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   WalletCards,
@@ -21,6 +22,8 @@ import { Toast } from "../../components/ui";
 import "../../styles/pages/admin/Dashboard.css";
 
 function AdminDashboard() {
+  const navigate = useNavigate();
+  
   const [students, setStudents] = useState([]);
   const [collections, setCollections] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -57,6 +60,14 @@ function AdminDashboard() {
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  const openCollectionDetails = (collectionId) => {
+    navigate(`/admin/collections/${collectionId}`);
+  };
+
+  const openPaymentCollection = (payment) => {
+    navigate(`/admin/collections/${payment.collection_id}`);
+  };
 
   const formatCurrency = (amount) => {
     return Number(amount || 0).toLocaleString("en-PH", {
@@ -164,24 +175,41 @@ function AdminDashboard() {
       <section className="dashboard-two-column">
         <div className="dashboard-panel">
           <div className="dashboard-panel-header">
-            <h3>Recent Payments</h3>
+            <div className="dashboard-panel-title-row">
+              <h3>Recent Payments</h3>
+                <button
+                className="section-link-btn"
+                type="button"
+                onClick={() => navigate("/admin/payments")}
+              >
+                View All
+              </button>
+            </div>          
             <p>Latest payment records created in the system.</p>
           </div>
 
           <div className="dashboard-list">
             {recentPayments.map((payment) => (
-              <article className="dashboard-list-item" key={payment.id}>
+              <article
+                className="dashboard-list-item clickable-dashboard-item"
+                key={payment.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => openPaymentCollection(payment)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    openPaymentCollection(payment);
+                  }
+                }}
+              >
                 <div>
                   <strong>{payment.full_name}</strong>
                   <span>{payment.collection_title}</span>
                 </div>
 
-                <div className="dashboard-list-meta">
-                  <strong>{formatCurrency(payment.amount_paid)}</strong>
-                  <span className={`status-pill ${payment.status}`}>
-                    {payment.status}
-                  </span>
-                </div>
+                <span className={`status-pill ${payment.status}`}>
+                  {payment.status}
+                </span>
               </article>
             ))}
 
@@ -193,24 +221,43 @@ function AdminDashboard() {
 
         <div className="dashboard-panel">
           <div className="dashboard-panel-header">
-            <h3>Recent Collections</h3>
+            <div className="dashboard-panel-title-row">
+              <h3>Recent Collections</h3>
+
+              <button
+                className="section-link-btn"
+                type="button"
+                onClick={() => navigate("/admin/collections")}
+              >
+                View All
+              </button>
+            </div>
+
             <p>Latest collections created by the treasurer.</p>
           </div>
 
           <div className="dashboard-list">
             {recentCollections.map((collection) => (
-              <article className="dashboard-list-item" key={collection.id}>
+              <article
+                className="dashboard-list-item clickable-dashboard-item"
+                key={collection.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => openCollectionDetails(collection.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    openCollectionDetails(collection.id);
+                  }
+                }}
+              >
                 <div>
                   <strong>{collection.title}</strong>
-                  <span>{collection.course} • {collection.year_level} • Section {collection.section}</span>
+                  <span>{collection.description || "No description provided."}</span>
                 </div>
 
-                <div className="dashboard-list-meta">
-                  <strong>{formatCurrency(collection.amount)}</strong>
-                  <span className={`status-pill ${collection.status}`}>
-                    {collection.status}
-                  </span>
-                </div>
+                <span className={`status-pill ${collection.status}`}>
+                  {collection.status}
+                </span>
               </article>
             ))}
 

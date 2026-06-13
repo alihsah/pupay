@@ -108,6 +108,16 @@ function AdminCollectionDetails() {
     }
   };
 
+  const handleStatusSelect = (event, payment) => {
+    const nextStatus = event.target.value;
+
+    if (!nextStatus) return;
+
+    openStatusConfirmModal(payment, nextStatus);
+
+    event.target.value = "";
+  };
+
   const formatCurrency = (amount) => {
     return Number(amount || 0).toLocaleString("en-PH", {
       style: "currency",
@@ -391,34 +401,27 @@ function AdminCollectionDetails() {
                   <td>{payment.paid_at ? formatDate(payment.paid_at) : "Not paid"}</td>
 
                   <td>
-                    <div className="collection-payment-actions">
+                    <select
+                      className="collection-payment-status-select"
+                      defaultValue=""
+                      onChange={(event) => handleStatusSelect(event, payment)}
+                    >
+                      <option value="" disabled>
+                        Update Status
+                      </option>
+
                       {payment.status !== "paid" && (
-                        <button
-                          type="button"
-                          onClick={() => openStatusConfirmModal(payment, "paid")}
-                        >
-                          Mark Paid
-                        </button>
+                        <option value="paid">Mark as Paid</option>
                       )}
 
                       {payment.status !== "pending" && (
-                        <button
-                          type="button"
-                          onClick={() => openStatusConfirmModal(payment, "pending")}
-                        >
-                          Pending
-                        </button>
+                        <option value="pending">Mark as Pending</option>
                       )}
 
                       {payment.status !== "overdue" && (
-                        <button
-                          type="button"
-                          onClick={() => openStatusConfirmModal(payment, "overdue")}
-                        >
-                          Overdue
-                        </button>
+                        <option value="overdue">Mark as Overdue</option>
                       )}
-                    </div>
+                    </select>
                   </td>
                 </tr>
               ))}

@@ -6,7 +6,13 @@ const COURSES = ["ALL", "BSIT", "BSHM", "BSOA", "BSCPE"];
 const YEARS = ["ALL", "1st Year", "2nd Year", "3rd Year", "4th Year"];
 const SECTIONS = ["ALL", "1", "2"];
 
-function CreateCollectionModal({ formData, onChange, onSubmit, onClose }) {
+function CreateCollectionModal({ 
+  formData, 
+  onChange, 
+  onSubmit, 
+  onClose,
+  isCreating,
+ }) {
   const [matchingStudents, setMatchingStudents] = useState(0);
   const [isCountingStudents, setIsCountingStudents] = useState(false);
 
@@ -187,8 +193,12 @@ function CreateCollectionModal({ formData, onChange, onSubmit, onClose }) {
             Cancel
           </button>
 
-          <button className="primary-btn" type="submit">
-            Create Collection
+          <button
+            className="primary-btn"
+            type="submit"
+            disabled={isCreating}
+          >
+            {isCreating ? "Creating..." : "Create Collection"}
           </button>
         </div>
       </form>

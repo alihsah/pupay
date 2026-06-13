@@ -1,4 +1,14 @@
 function PaymentTable({ payments, onUpdateStatus, formatCurrency, formatDate }) {
+  const handleStatusSelect = (event, payment) => {
+    const nextStatus = event.target.value;
+
+    if (!nextStatus) return;
+
+    onUpdateStatus(payment, nextStatus);
+
+    event.target.value = "";
+  };
+
   return (
     <div className="payments-table-wrap">
       <table className="payments-table">
@@ -6,11 +16,12 @@ function PaymentTable({ payments, onUpdateStatus, formatCurrency, formatDate }) 
           <tr>
             <th>Student</th>
             <th>Collection</th>
+            <th>Program</th>
             <th>Amount</th>
             <th>Method</th>
             <th>Status</th>
             <th>Paid At</th>
-            <th>Actions</th>
+            <th>Action</th>
           </tr>
         </thead>
 
@@ -24,7 +35,14 @@ function PaymentTable({ payments, onUpdateStatus, formatCurrency, formatDate }) 
 
               <td>
                 <span>{payment.collection_title}</span>
-                <small>{formatDate(payment.due_date)}</small>
+                <small>Reference: {payment.reference_number || "N/A"}</small>
+              </td>
+
+              <td>
+                <span>{payment.course}</span>
+                <small>
+                  {payment.year_level} • Section {payment.section}
+                </small>
               </td>
 
               <td>
@@ -32,7 +50,7 @@ function PaymentTable({ payments, onUpdateStatus, formatCurrency, formatDate }) 
                 <small>Due: {formatCurrency(payment.amount_due)}</small>
               </td>
 
-              <td>{payment.payment_method}</td>
+              <td>{payment.payment_method || "cash"}</td>
 
               <td>
                 <span className={`status-pill ${payment.status}`}>
@@ -40,44 +58,39 @@ function PaymentTable({ payments, onUpdateStatus, formatCurrency, formatDate }) 
                 </span>
               </td>
 
-              <td>{payment.paid_at ? formatDate(payment.paid_at) : "Not paid"}</td>
+              <td>
+                {payment.paid_at ? formatDate(payment.paid_at) : "Not paid"}
+              </td>
 
               <td>
-                <div className="payments-actions">
+                <select
+                  className="payment-status-select"
+                  defaultValue=""
+                  onChange={(event) => handleStatusSelect(event, payment)}
+                >
+                  <option value="" disabled>
+                    Update Status
+                  </option>
+
                   {payment.status !== "paid" && (
-                    <button
-                      type="button"
-                      onClick={() => onUpdateStatus(payment, "paid")}
-                    >
-                      Mark Paid
-                    </button>
+                    <option value="paid">Mark as Paid</option>
                   )}
 
                   {payment.status !== "pending" && (
-                    <button
-                      type="button"
-                      onClick={() => onUpdateStatus(payment, "pending")}
-                    >
-                      Pending
-                    </button>
+                    <option value="pending">Mark as Pending</option>
                   )}
 
                   {payment.status !== "overdue" && (
-                    <button
-                      type="button"
-                      onClick={() => onUpdateStatus(payment, "overdue")}
-                    >
-                      Overdue
-                    </button>
+                    <option value="overdue">Mark as Overdue</option>
                   )}
-                </div>
+                </select>
               </td>
             </tr>
           ))}
 
           {payments.length === 0 && (
             <tr>
-              <td colSpan="7">No payments found.</td>
+              <td colSpan="8">No payment records found.</td>
             </tr>
           )}
         </tbody>

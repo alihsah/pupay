@@ -13,6 +13,7 @@ import {
 import { useClerk } from "@clerk/clerk-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "../../styles/components/layout/Sidebar.css";
+import { Archive } from "lucide-react";
 
 const adminMenuItems = [
   {
@@ -39,6 +40,11 @@ const adminMenuItems = [
     label: "Announcements",
     icon: Megaphone,
     path: "/admin/announcements",
+  },
+  {
+    label: "Archives",
+    path: "/admin/archives",
+    icon: Archive,
   },
   {
     label: "AI Helper",
