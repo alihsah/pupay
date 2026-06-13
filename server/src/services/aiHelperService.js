@@ -17,6 +17,14 @@ const formatDate = (date) => {
   });
 };
 
+const countVerb = (count) => {
+  return Number(count) === 1 ? "is" : "are";
+};
+
+const paidVerb = (count) => {
+  return Number(count) === 1 ? "has" : "have";
+};
+
 const buildCollectionContext = (data = {}) => {
   const { collection, progress, stats } = data;
 
@@ -31,9 +39,11 @@ Collection Information:
 Progress:
 - Progress Percentage: ${progress?.progress ?? 0}%
 - Total Collected: ${formatCurrency(
-    progress?.totalCollected || stats?.totalCollected
+    progress?.totalCollected ?? stats?.totalCollected
   )}
-- Goal Amount from Progress: ${formatCurrency(progress?.goalAmount)}
+- Goal Amount from Progress: ${formatCurrency(
+    progress?.goalAmount ?? collection?.goal_amount
+  )}
 - Is Locked: ${progress?.isLocked ? "Yes, goal reached" : "No, still open"}
 
 Payment Statistics:
@@ -46,6 +56,10 @@ Payment Statistics:
 
 const fallbackReminder = (data = {}) => {
   const { collection, stats, tone, reminderType } = data;
+  const totalStudents = stats?.totalStudents || 0;
+  const paidCount = stats?.paidCount || 0;
+  const pendingCount = stats?.pendingCount || 0;
+  const overdueCount = stats?.overdueCount || 0;
 
   const intro =
     tone === "formal"
@@ -68,38 +82,55 @@ const fallbackReminder = (data = {}) => {
   return `${intro} This is a reminder regarding the collection "${
     collection?.title || "Untitled collection"
   }" due on ${formatDate(collection?.due_date)}. Currently, ${
-    stats?.paidCount || 0
-  } out of ${stats?.totalStudents || 0} students have paid, while ${
-    stats?.pendingCount || 0
-  } are still pending and ${
-    stats?.overdueCount || 0
-  } are overdue. ${
+    paidCount
+  } out of ${totalStudents} students ${paidVerb(paidCount)} paid, while ${
+    pendingCount
+  } ${countVerb(pendingCount)} still pending and ${
+    overdueCount
+  } ${countVerb(overdueCount)} overdue. ${
     reminderMessage[reminderType] || reminderMessage.general
   } Thank you.`;
 };
 
 const fallbackSummary = (data = {}) => {
   const { collection, progress, stats } = data;
+  const progressPercentage = progress?.progress ?? 0;
+  const totalCollected = progress?.totalCollected ?? stats?.totalCollected ?? 0;
+  const goalAmount = progress?.goalAmount ?? collection?.goal_amount ?? 0;
+  const totalStudents = stats?.totalStudents || 0;
+  const paidCount = stats?.paidCount || 0;
+  const pendingCount = stats?.pendingCount || 0;
+  const overdueCount = stats?.overdueCount || 0;
+  const recommendedAction =
+    overdueCount > 0
+      ? "prioritize follow-up with overdue students"
+      : pendingCount > 0
+      ? "send a reminder to students with pending payments"
+      : "continue monitoring the collection until it is closed";
 
   return `The collection "${
     collection?.title || "Untitled collection"
-  }" is currently ${progress?.progress || 0}% complete. A total of ${
-    stats?.paidCount || 0
-  } out of ${stats?.totalStudents || 0} students have paid, with ${
-    stats?.pendingCount || 0
-  } pending and ${
-    stats?.overdueCount || 0
-  } overdue. The admin should monitor unpaid students and send a payment reminder if needed.`;
+  }" is currently ${progressPercentage}% complete, with ${formatCurrency(
+    totalCollected
+  )} collected out of ${formatCurrency(goalAmount)}. Out of ${totalStudents} students, ${paidCount} ${paidVerb(
+    paidCount
+  )} paid, ${pendingCount} ${countVerb(
+    pendingCount
+  )} pending, and ${overdueCount} ${countVerb(
+    overdueCount
+  )} overdue. Recommended action: ${recommendedAction}.`;
 };
 
 const fallbackAnnouncement = (data = {}) => {
-  const { collection } = data;
+  const { collection, instruction } = data;
+  const title = collection?.title || "Untitled collection";
+  const dueDateText = collection?.due_date
+    ? ` The due date is ${formatDate(collection.due_date)}.`
+    : "";
+  const adminInstruction =
+    instruction?.trim() || "Please settle your payment as soon as possible.";
 
-  return `Good day, students. Please be reminded about the collection "${
-    collection?.title || "Untitled collection"
-  }" with a due date of ${formatDate(
-    collection?.due_date
-  )}. Kindly settle your payment before the deadline. Thank you.`;
+  return `Good day, students. Please be reminded about the collection "${title}".${dueDateText} ${adminInstruction} Kindly check your payment status and settle any pending balance. Thank you.`;
 };
 
 export const generateAIReminder = async (data = {}) => {
@@ -147,7 +178,7 @@ Rules:
   }
 };
 
-export const generateAICollectionSummary = async (data) => {
+export const generateAICollectionSummary = async (data = {}) => {
   try {
     const context = buildCollectionContext(data);
 
@@ -160,7 +191,11 @@ Generate a short admin summary of the collection status.
 ${context}
 
 Rules:
+- Mention the collection title.
 - Explain the current collection progress.
+- Include the progress percentage.
+- Include total collected versus goal amount.
+- Include total students.
 - Mention paid, pending, and overdue counts.
 - Include one useful recommendation for the admin.
 - Keep it concise and professional.
@@ -184,7 +219,7 @@ Rules:
   }
 };
 
-export const generateAIAnnouncement = async (data) => {
+export const generateAIAnnouncement = async (data = {}) => {
   try {
     const context = buildCollectionContext(data);
 
@@ -201,9 +236,11 @@ ${context}
 
 Rules:
 - Make it suitable for a school payment announcement.
+- Follow the admin instruction while keeping it related to the selected collection.
 - Keep it polite, clear, and student-friendly.
 - Mention the collection title.
 - Mention the due date if available.
+- Include a payment reminder or update based on the admin instruction.
 - Keep it 2 to 4 sentences.
 - Do not use hashtags.
 - Do not include markdown formatting.

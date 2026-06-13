@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
   Bot,
   CheckCircle,
   Clipboard,
+  FileText,
   Loader2,
+  Megaphone,
   MessageSquareText,
   Sparkles,
 } from "lucide-react";
@@ -14,7 +17,11 @@ import {
   getCollectionProgress,
 } from "../../services/collectionService";
 import { getPaymentsByCollection } from "../../services/paymentService";
-import { generateAIReminder } from "../../services/aiService";
+import {
+  generateAIAnnouncement,
+  generateAICollectionSummary,
+  generateAIReminder,
+} from "../../services/aiService";
 
 import { Toast } from "../../components/ui";
 
@@ -28,6 +35,8 @@ const normalizeCollectionList = (data) => {
 };
 
 function AIHelper() {
+  const navigate = useNavigate();
+
   const [collections, setCollections] = useState([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState("");
 
@@ -36,6 +45,10 @@ function AIHelper() {
 
   const [tone, setTone] = useState("friendly");
   const [reminderType, setReminderType] = useState("general");
+  const [instruction, setInstruction] = useState(
+    "Remind students to settle their payment before the due date."
+  );
+  const [activeOutputType, setActiveOutputType] = useState("");
   const [generatedText, setGeneratedText] = useState("");
   const [source, setSource] = useState("");
 
@@ -130,6 +143,7 @@ function AIHelper() {
     if (selectedCollectionId) {
       setGeneratedText("");
       setSource("");
+      setActiveOutputType("");
       loadSelectedCollectionData(selectedCollectionId);
     }
   }, [selectedCollectionId]);
@@ -158,6 +172,7 @@ function AIHelper() {
       stats,
       tone,
       reminderType,
+      instruction,
     };
   };
 
@@ -172,6 +187,7 @@ function AIHelper() {
       setGeneratingType("reminder");
       setGeneratedText("");
       setSource("");
+      setActiveOutputType("reminder");
 
       const payload = buildPayload();
       const response = await generateAIReminder(payload);
@@ -192,12 +208,91 @@ function AIHelper() {
     try {
       await navigator.clipboard.writeText(generatedText);
 
-      setMessage("AI-generated reminder copied.");
+      setMessage("AI-generated text copied.");
       setMessageType("success");
     } catch {
-      setMessage("Unable to copy reminder text.");
+      setMessage("Unable to copy generated text.");
       setMessageType("error");
     }
+  };
+
+  const handleUseAsAnnouncement = () => {
+    const aiDraft = generatedText.trim();
+
+    if (!aiDraft) {
+      setMessage("Generate or write announcement text first.");
+      setMessageType("error");
+      return;
+    }
+
+    navigate("/admin/announcements", {
+      state: {
+        aiDraft,
+        selectedCollection,
+      },
+    });
+  };
+
+  const handleGenerateSummary = async () => {
+    if (!selectedCollection) {
+      setMessage("Please select a collection first.");
+      setMessageType("error");
+      return;
+    }
+
+    try {
+      setGeneratingType("summary");
+      setGeneratedText("");
+      setSource("");
+      setActiveOutputType("summary");
+
+      const payload = buildPayload();
+      const response = await generateAICollectionSummary(payload);
+
+      setGeneratedText(response?.result?.text || "");
+      setSource(response?.result?.source || "");
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || "Failed to generate AI summary."
+      );
+      setMessageType("error");
+    } finally {
+      setGeneratingType("");
+    }
+  };
+
+  const handleGenerateAnnouncement = async () => {
+    if (!selectedCollection) {
+      setMessage("Please select a collection first.");
+      setMessageType("error");
+      return;
+    }
+
+    try {
+      setGeneratingType("announcement");
+      setGeneratedText("");
+      setSource("");
+      setActiveOutputType("announcement");
+
+      const payload = buildPayload();
+      const response = await generateAIAnnouncement(payload);
+
+      setGeneratedText(response?.result?.text || "");
+      setSource(response?.result?.source || "");
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || "Failed to generate AI announcement."
+      );
+      setMessageType("error");
+    } finally {
+      setGeneratingType("");
+    }
+  };
+
+  const outputTitle = {
+    reminder: "Generated Payment Reminder",
+    summary: "Generated Collection Summary",
+    announcement: "Generated Announcement",
   };
 
   return (
@@ -221,8 +316,9 @@ function AIHelper() {
           <h2>AI Helper</h2>
 
           <p>
-            Generate payment reminder drafts based on real PUPay collection
-            data, payment status, and collection progress.
+            Generate payment reminders, collection summaries, and announcement
+            drafts based on real PUPay collection data, payment status, and
+            progress.
           </p>
         </div>
 
@@ -331,8 +427,8 @@ function AIHelper() {
 
         <div className="ai-helper-tools-panel">
           <div className="ai-helper-panel-header">
-            <h3>AI Reminder Generator</h3>
-            <p>Choose the tone and reminder type for this collection.</p>
+            <h3>AI Tools</h3>
+            <p>Choose what you want PUPay AI to generate for this collection.</p>
           </div>
 
           <div className="ai-helper-options-grid">
@@ -361,6 +457,17 @@ function AIHelper() {
             </label>
           </div>
 
+          <label className="ai-helper-field">
+            <span>Announcement Instruction</span>
+
+            <textarea
+              value={instruction}
+              onChange={(event) => setInstruction(event.target.value)}
+              placeholder="Example: Remind students that payment is due tomorrow."
+              rows="4"
+            />
+          </label>
+
           <div className="ai-helper-tool-grid">
             <button
               type="button"
@@ -379,13 +486,51 @@ function AIHelper() {
                 </em>
               )}
             </button>
+
+            <button
+              type="button"
+              className="ai-helper-tool-card"
+              onClick={handleGenerateSummary}
+              disabled={!!generatingType || loadingCollectionData}
+            >
+              <FileText size={22} />
+              <span>Generate Collection Summary</span>
+              <small>Summarize progress and recommend the next admin action.</small>
+
+              {generatingType === "summary" && (
+                <em>
+                  <Loader2 size={14} />
+                  Generating...
+                </em>
+              )}
+            </button>
+
+            <button
+              type="button"
+              className="ai-helper-tool-card"
+              onClick={handleGenerateAnnouncement}
+              disabled={!!generatingType || loadingCollectionData}
+            >
+              <Megaphone size={22} />
+              <span>Generate Announcement</span>
+              <small>Draft a student-friendly announcement to copy later.</small>
+
+              {generatingType === "announcement" && (
+                <em>
+                  <Loader2 size={14} />
+                  Generating...
+                </em>
+              )}
+            </button>
           </div>
 
           <div className="ai-helper-output-panel">
             <div className="ai-helper-output-header">
               <div>
                 <h3>
-                  Generated Payment Reminder
+                  {activeOutputType
+                    ? outputTitle[activeOutputType]
+                    : "Generated Output"}
                 </h3>
 
                 <p>
@@ -407,15 +552,27 @@ function AIHelper() {
                 </p>
               </div>
 
-              <button
-                type="button"
-                className="ai-helper-copy-btn"
-                onClick={handleCopy}
-                disabled={!generatedText}
-              >
-                <Clipboard size={16} />
-                Copy
-              </button>
+              <div className="ai-helper-output-actions">
+                <button
+                  type="button"
+                  className="ai-helper-use-btn"
+                  onClick={handleUseAsAnnouncement}
+                  disabled={!generatedText.trim()}
+                >
+                  <Megaphone size={16} />
+                  Use as Announcement
+                </button>
+
+                <button
+                  type="button"
+                  className="ai-helper-copy-btn"
+                  onClick={handleCopy}
+                  disabled={!generatedText.trim()}
+                >
+                  <Clipboard size={16} />
+                  Copy
+                </button>
+              </div>
             </div>
 
             <textarea
