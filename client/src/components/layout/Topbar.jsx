@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import { UserButton } from "@clerk/clerk-react";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { getStudentUnreadNotificationCount } from "../../services/notificationService";
@@ -58,7 +58,7 @@ const pageTitles = {
   },
 };
 
-function Topbar() {
+function Topbar({ onOpenSidebar = () => {} }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -109,9 +109,20 @@ function Topbar() {
 
   return (
     <header className="topbar">
-      <div>
-        <h1>{currentPage.title}</h1>
-        <p>{currentPage.subtitle}</p>
+      <div className="topbar-title-group">
+        <button
+          className="topbar-menu-btn"
+          type="button"
+          onClick={onOpenSidebar}
+          aria-label="Open navigation menu"
+        >
+          <Menu size={22} />
+        </button>
+
+        <div className="topbar-title-copy">
+          <h1>{currentPage.title}</h1>
+          <p>{currentPage.subtitle}</p>
+        </div>
       </div>
 
       <div className="topbar-actions">
