@@ -17,7 +17,7 @@ const formatDate = (date) => {
   });
 };
 
-const buildCollectionContext = (data) => {
+const buildCollectionContext = (data = {}) => {
   const { collection, progress, stats } = data;
 
   return `
@@ -44,8 +44,8 @@ Payment Statistics:
 `;
 };
 
-const fallbackReminder = (data) => {
-  const { collection, stats, tone } = data;
+const fallbackReminder = (data = {}) => {
+  const { collection, stats, tone, reminderType } = data;
 
   const intro =
     tone === "formal"
@@ -53,6 +53,17 @@ const fallbackReminder = (data) => {
       : tone === "urgent"
       ? "Important reminder, students."
       : "Hello, students!";
+
+  const reminderMessage = {
+    pending:
+      "If your payment is still pending, please settle it before the deadline.",
+    overdue:
+      "If your payment is already overdue, please settle it as soon as possible.",
+    final:
+      "This is a final reminder to settle your payment before the collection closes.",
+    general:
+      "Kindly settle your payment before the deadline.",
+  };
 
   return `${intro} This is a reminder regarding the collection "${
     collection?.title || "Untitled collection"
@@ -62,10 +73,12 @@ const fallbackReminder = (data) => {
     stats?.pendingCount || 0
   } are still pending and ${
     stats?.overdueCount || 0
-  } are overdue. Kindly settle your payment as soon as possible. Thank you.`;
+  } are overdue. ${
+    reminderMessage[reminderType] || reminderMessage.general
+  } Thank you.`;
 };
 
-const fallbackSummary = (data) => {
+const fallbackSummary = (data = {}) => {
   const { collection, progress, stats } = data;
 
   return `The collection "${
@@ -79,7 +92,7 @@ const fallbackSummary = (data) => {
   } overdue. The admin should monitor unpaid students and send a payment reminder if needed.`;
 };
 
-const fallbackAnnouncement = (data) => {
+const fallbackAnnouncement = (data = {}) => {
   const { collection } = data;
 
   return `Good day, students. Please be reminded about the collection "${
@@ -89,7 +102,7 @@ const fallbackAnnouncement = (data) => {
   )}. Kindly settle your payment before the deadline. Thank you.`;
 };
 
-export const generateAIReminder = async (data) => {
+export const generateAIReminder = async (data = {}) => {
   try {
     const context = buildCollectionContext(data);
 
