@@ -42,7 +42,6 @@
   justify-content: center;
   font-weight: 800;
   font-size: 1.4rem;
-  box-shadow: var(--shadow-primary);
 }
 
 .sidebar-logo-image {

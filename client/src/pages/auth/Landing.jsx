@@ -13,7 +13,13 @@ function Landing() {
         <main className="landing-page">
           <nav className="landing-nav">
             <div className="landing-logo">
-              <span>P</span>
+              <div className="sidebar-logo-mark">
+              <img
+                className="sidebar-logo-image"
+                src="/pupay-logo.png"
+                alt="PUPay logo"
+              />
+             </div>
               <div>
                 <h2>PUPay</h2>
                 <p>Payment Tracking System</p>
