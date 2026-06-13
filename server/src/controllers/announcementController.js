@@ -1,4 +1,5 @@
 import db from "../config/db.js";
+import { ensureAnnouncementReadsTable } from "../services/notificationService.js";
 
 export const getAllAnnouncements = async (req, res) => {
   try {
@@ -35,28 +36,39 @@ export const getMyAnnouncements = async (req, res) => {
     }
 
     const { course, yearLevel, section } = req.user;
+    const studentId = req.user.studentId;
+
+    await ensureAnnouncementReadsTable();
 
     const [announcements] = await db.query(
       `
       SELECT
-        id,
-        title,
-        message,
-        type,
-        course,
-        year_level,
-        section,
-        status,
-        created_at,
-        updated_at
+        announcements.id,
+        announcements.title,
+        announcements.message,
+        announcements.type,
+        announcements.course,
+        announcements.year_level,
+        announcements.section,
+        announcements.status,
+        announcements.created_at,
+        announcements.updated_at,
+        CASE
+          WHEN announcement_reads.read_at IS NULL THEN FALSE
+          ELSE TRUE
+        END AS is_read,
+        announcement_reads.read_at
       FROM announcements
+      LEFT JOIN announcement_reads
+        ON announcement_reads.announcement_id = announcements.id
+        AND announcement_reads.student_id = ?
       WHERE status = 'active'
-        AND (course = ? OR course = 'ALL')
-        AND (year_level = ? OR year_level = 'ALL')
-        AND (section = ? OR section = 'ALL')
-      ORDER BY created_at DESC
+        AND (announcements.course = ? OR announcements.course = 'ALL')
+        AND (announcements.year_level = ? OR announcements.year_level = 'ALL')
+        AND (announcements.section = ? OR announcements.section = 'ALL')
+      ORDER BY announcements.created_at DESC
       `,
-      [course, yearLevel, section]
+      [studentId, course, yearLevel, section]
     );
 
     res.status(200).json(announcements);

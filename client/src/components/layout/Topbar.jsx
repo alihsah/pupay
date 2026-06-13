@@ -1,8 +1,10 @@
+import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { Search, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
 import { UserButton } from "@clerk/clerk-react";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { getStudentUnreadNotificationCount } from "../../services/notificationService";
 import "../../styles/components/layout/Topbar.css";
 
 const pageTitles = {
@@ -62,6 +64,43 @@ function Topbar() {
 
   const isStudentPortal = location.pathname.startsWith("/student");
   const { currentUser } = useCurrentUser();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const loadUnreadCount = useCallback(async () => {
+    if (!isStudentPortal || currentUser?.role !== "student") {
+      setUnreadCount(0);
+      return;
+    }
+
+    try {
+      const data = await getStudentUnreadNotificationCount();
+      setUnreadCount(Number(data.unreadCount || 0));
+    } catch {
+      setUnreadCount(0);
+    }
+  }, [isStudentPortal, currentUser?.role]);
+
+  useEffect(() => {
+    loadUnreadCount();
+  }, [loadUnreadCount, location.pathname]);
+
+  useEffect(() => {
+    const handleNotificationsUpdated = () => {
+      loadUnreadCount();
+    };
+
+    window.addEventListener(
+      "pupay:notifications-updated",
+      handleNotificationsUpdated
+    );
+
+    return () => {
+      window.removeEventListener(
+        "pupay:notifications-updated",
+        handleNotificationsUpdated
+      );
+    };
+  }, [loadUnreadCount]);
 
   const currentPage = pageTitles[location.pathname] || {
     title: "PUPay",
@@ -77,10 +116,22 @@ function Topbar() {
 
       <div className="topbar-actions">
         {isStudentPortal && (
-          <button className="topbar-icon-btn" type="button"
+          <button
+            className="topbar-icon-btn"
+            type="button"
             onClick={() => navigate("/student/notifications")}
-            aria-label="Open notifications">
+            aria-label={
+              unreadCount > 0
+                ? `Open notifications (${unreadCount} unread)`
+                : "Open notifications"
+            }
+          >
             <Bell size={20} />
+            {unreadCount > 0 && (
+              <span className="topbar-notification-badge">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
         )}
        

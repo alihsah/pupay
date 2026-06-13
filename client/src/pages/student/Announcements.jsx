@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { getMyAnnouncements } from "../../services/announcementService";
+import { markNotificationRead } from "../../services/notificationService";
+import { AnnouncementDetailsModal } from "../../components/announcements";
 import { Toast } from "../../components/ui";
 
 import "../../styles/pages/student/Announcements.css";
@@ -15,6 +17,7 @@ function StudentAnnouncements() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
   const loadAnnouncements = async () => {
     try {
@@ -47,6 +50,45 @@ function StudentAnnouncements() {
     if (type === "payment_reminder") return "Payment Reminder";
     if (type === "deadline") return "Deadline";
     return "General";
+  };
+
+  const markLocalAnnouncementRead = (announcementId) => {
+    const readAt = new Date().toISOString();
+
+    setAnnouncements((currentAnnouncements) =>
+      currentAnnouncements.map((announcement) =>
+        announcement.id === announcementId
+          ? { ...announcement, is_read: true, read_at: announcement.read_at || readAt }
+          : announcement
+      )
+    );
+
+    setSelectedAnnouncement((currentAnnouncement) =>
+      currentAnnouncement?.id === announcementId
+        ? {
+            ...currentAnnouncement,
+            is_read: true,
+            read_at: currentAnnouncement.read_at || readAt,
+          }
+        : currentAnnouncement
+    );
+  };
+
+  const openAnnouncementDetails = async (announcement) => {
+    setSelectedAnnouncement(announcement);
+
+    if (announcement.is_read) return;
+
+    try {
+      await markNotificationRead(announcement.id);
+      markLocalAnnouncementRead(announcement.id);
+      window.dispatchEvent(new Event("pupay:notifications-updated"));
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || "Failed to mark announcement as read."
+      );
+      setMessageType("error");
+    }
   };
 
   const filteredAnnouncements = announcements
@@ -165,17 +207,39 @@ function StudentAnnouncements() {
         ) : (
           <div className="student-announcement-list">
             {filteredAnnouncements.map((announcement) => (
-              <article className="student-announcement-item" key={announcement.id}>
+              <article
+                className={`student-announcement-item ${
+                  announcement.is_read ? "" : "unread"
+                }`}
+                key={announcement.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => openAnnouncementDetails(announcement)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openAnnouncementDetails(announcement);
+                  }
+                }}
+              >
                 <div className="student-announcement-main">
                   <div className="student-announcement-title-row">
-                    <h3>{announcement.title}</h3>
+                    <div className="student-announcement-title-with-dot">
+                      {!announcement.is_read && (
+                        <span className="student-unread-dot" aria-label="Unread" />
+                      )}
+
+                      <h3>{announcement.title}</h3>
+                    </div>
 
                     <span className={`announcement-type-pill ${announcement.type}`}>
                       {formatType(announcement.type)}
                     </span>
                   </div>
 
-                  <p>{announcement.message}</p>
+                  <p className="student-announcement-preview">
+                    {announcement.message}
+                  </p>
                 </div>
 
                 <div className="student-announcement-footer">
@@ -196,6 +260,13 @@ function StudentAnnouncements() {
           </div>
         )}
       </section>
+
+      <AnnouncementDetailsModal
+        announcement={selectedAnnouncement}
+        formatDate={formatDate}
+        formatType={formatType}
+        onClose={() => setSelectedAnnouncement(null)}
+      />
     </main>
   );
 }

@@ -8,6 +8,7 @@ import studentRoutes from "./routes/studentRoutes.js";
 import collectionRoutes from "./routes/collectionRoutes.js";
 import announcementRoutes from "./routes/announcementRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/students", studentRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req, res) => {
   res.send("PUPay backend is running");
