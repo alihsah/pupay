@@ -18,7 +18,7 @@ router.post(
   allowRoles("admin"),
   async (req, res) => {
     try {
-      const result = await generateAIReminder(req.body);
+      const result = await generateAIReminder(req.body || {});
 
       return res.status(200).json({
         success: true,

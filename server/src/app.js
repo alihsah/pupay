@@ -23,8 +23,6 @@ app.use(
   })
 );
 
-app.use("/api/ai", aiRoutes);
-
 app.use(clerkMiddleware());
 
 /* Routes */ 
@@ -33,6 +31,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/announcements", announcementRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => {
   res.send("PUPay backend is running");
