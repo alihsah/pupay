@@ -129,6 +129,34 @@ function AdminCollections() {
     setShowEditModal(true);
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (isCreatingCollection) return;
+
+    try {
+      setIsCreatingCollection(true);
+
+      const payload = {
+        ...formData,
+        goal_amount: Number(formData.goal_amount),
+      };
+
+      await createCollection(payload);
+
+      setMessage("Collection created successfully.");
+      setMessageType("success");
+
+      resetForm();
+      loadCollections(false);
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Failed to create collection.");
+      setMessageType("error");
+    } finally {
+      setIsCreatingCollection(false);
+    }
+  };
+
   const handleEditSubmit = async (event) => {
     event.preventDefault();
 

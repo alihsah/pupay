@@ -1,4 +1,5 @@
 import db from "../config/db.js";
+import { sendAnnouncementEmailNotifications } from "../services/emailService.js";
 import { ensureAnnouncementReadsTable } from "../services/notificationService.js";
 
 export const getAllAnnouncements = async (req, res) => {
@@ -145,7 +146,7 @@ export const createAnnouncement = async (req, res) => {
       });
     }
 
-    await db.query(
+    const [result] = await db.query(
       `
       INSERT INTO announcements (
         title,
@@ -170,6 +171,19 @@ export const createAnnouncement = async (req, res) => {
         req.user?.clerkUserId || null,
       ]
     );
+
+    sendAnnouncementEmailNotifications({
+      id: result.insertId,
+      title,
+      message,
+      type,
+      course,
+      year_level,
+      section,
+      status,
+    }).catch((error) => {
+      console.error("Announcement email notification error:", error);
+    });
 
     res.status(201).json({ message: "Announcement created successfully." });
   } catch (error) {
