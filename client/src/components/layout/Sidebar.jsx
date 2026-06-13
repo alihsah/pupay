@@ -98,7 +98,13 @@ function Sidebar() {
     <aside className="sidebar">
       <div>
         <div className="sidebar-logo">
-          <div className="sidebar-logo-mark">P</div>
+          <div className="sidebar-logo-mark">
+            <img
+              className="sidebar-logo-image"
+              src="/pupay-logo.png"
+              alt="PUPay logo"
+            />
+          </div>
 
           <div className="sidebar-logo-text">
             <h2>PUPay</h2>
