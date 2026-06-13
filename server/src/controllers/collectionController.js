@@ -1,4 +1,114 @@
 import db from "../config/db.js";
+import { sendAnnouncementEmailNotifications } from "../services/emailService.js";
+
+const formatCollectionDueDate = (dueDate) => {
+  if (!dueDate) return null;
+
+  const parsedDate = new Date(dueDate);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return String(dueDate);
+  }
+
+  return parsedDate.toLocaleDateString("en-PH", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+const buildCollectionAnnouncementMessage = ({ title, due_date }) => {
+  const dueDateText = formatCollectionDueDate(due_date);
+  const dueDateSentence = dueDateText ? ` The due date is ${dueDateText}.` : "";
+
+  return `A new collection named "${title}" has been assigned to you.${dueDateSentence} Please check My Collections to view your contribution amount, due date, and payment status.`;
+};
+
+const createCollectionAnnouncementNotification = async ({
+  title,
+  course,
+  year_level,
+  section,
+  due_date,
+  status,
+  created_by,
+}) => {
+  if (status !== "active") {
+    return;
+  }
+
+  const announcement = {
+    title: `New Collection: ${title}`,
+    message: buildCollectionAnnouncementMessage({ title, due_date }),
+    type: "payment_reminder",
+    course,
+    year_level,
+    section,
+    status: "active",
+    created_by,
+  };
+
+  const [existingAnnouncements] = await db.query(
+    `
+    SELECT id
+    FROM announcements
+    WHERE type = ?
+      AND title = ?
+      AND message = ?
+      AND course = ?
+      AND year_level = ?
+      AND section = ?
+      AND status = 'active'
+      AND created_by <=> ?
+      AND created_at >= DATE_SUB(NOW(), INTERVAL 10 MINUTE)
+    LIMIT 1
+    `,
+    [
+      announcement.type,
+      announcement.title,
+      announcement.message,
+      announcement.course,
+      announcement.year_level,
+      announcement.section,
+      announcement.created_by,
+    ]
+  );
+
+  if (existingAnnouncements.length > 0) {
+    return;
+  }
+
+  const [result] = await db.query(
+    `
+    INSERT INTO announcements (
+      title,
+      message,
+      type,
+      course,
+      year_level,
+      section,
+      status,
+      created_by
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+    [
+      announcement.title,
+      announcement.message,
+      announcement.type,
+      announcement.course,
+      announcement.year_level,
+      announcement.section,
+      announcement.status,
+      announcement.created_by,
+    ]
+  );
+
+  await sendAnnouncementEmailNotifications({
+    id: result.insertId,
+    ...announcement,
+  });
+};
 
 export const getAllCollections = async (req, res) => {
   try {
@@ -289,6 +399,21 @@ export const createCollection = async (req, res) => {
     );
 
     await connection.commit();
+
+    createCollectionAnnouncementNotification({
+      title,
+      course,
+      year_level,
+      section,
+      due_date,
+      status,
+      created_by: req.user?.clerkUserId || null,
+    }).catch((error) => {
+      console.warn(
+        "Automatic collection announcement notification failed:",
+        error?.message || error
+      );
+    });
 
     res.status(201).json({
       message: "Collection created successfully.",
