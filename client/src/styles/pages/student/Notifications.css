@@ -65,6 +65,20 @@
   border-radius: 18px;
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.student-notification-card:hover,
+.student-notification-card:focus {
+  border-color: rgba(201, 24, 74, 0.35);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.student-notification-card.unread {
+  border-color: rgba(201, 24, 74, 0.35);
+  background: var(--color-surface-soft);
 }
 
 .student-notification-card-main {
@@ -79,10 +93,31 @@
   font-size: 1rem;
 }
 
+.student-notification-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-unread-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
 .student-notification-card p {
   margin: 8px 0 0;
   color: var(--color-text-muted);
   line-height: 1.5;
+}
+
+.student-notification-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .student-notification-meta {

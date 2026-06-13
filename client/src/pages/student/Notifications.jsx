@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { getMyAnnouncements } from "../../services/announcementService";
+import { markNotificationRead } from "../../services/notificationService";
+import { AnnouncementDetailsModal } from "../../components/announcements";
 import { Toast } from "../../components/ui";
 
 import "../../styles/pages/student/Notifications.css";
@@ -15,6 +17,7 @@ function StudentNotifications() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
+  const [selectedNotification, setSelectedNotification] = useState(null);
 
   const loadNotifications = async (showPageLoading = true) => {
     try {
@@ -56,6 +59,45 @@ function StudentNotifications() {
     return type
       .replace("_", " ")
       .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  };
+
+  const markLocalNotificationRead = (notificationId) => {
+    const readAt = new Date().toISOString();
+
+    setNotifications((currentNotifications) =>
+      currentNotifications.map((notification) =>
+        notification.id === notificationId
+          ? { ...notification, is_read: true, read_at: notification.read_at || readAt }
+          : notification
+      )
+    );
+
+    setSelectedNotification((currentNotification) =>
+      currentNotification?.id === notificationId
+        ? {
+            ...currentNotification,
+            is_read: true,
+            read_at: currentNotification.read_at || readAt,
+          }
+        : currentNotification
+    );
+  };
+
+  const openNotificationDetails = async (notification) => {
+    setSelectedNotification(notification);
+
+    if (notification.is_read) return;
+
+    try {
+      await markNotificationRead(notification.id);
+      markLocalNotificationRead(notification.id);
+      window.dispatchEvent(new Event("pupay:notifications-updated"));
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || "Failed to mark notification as read."
+      );
+      setMessageType("error");
+    }
   };
 
   const filteredNotifications = notifications
@@ -146,11 +188,34 @@ function StudentNotifications() {
         ) : (
           <div className="student-notification-list">
             {filteredNotifications.map((notification) => (
-              <article className="student-notification-card" key={notification.id}>
+              <article
+                className={`student-notification-card ${
+                  notification.is_read ? "" : "unread"
+                }`}
+                key={notification.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => openNotificationDetails(notification)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openNotificationDetails(notification);
+                  }
+                }}
+              >
                 <div className="student-notification-card-main">
                   <div>
-                    <h3>{notification.title}</h3>
-                    <p>{notification.message}</p>
+                    <div className="student-notification-title-row">
+                      {!notification.is_read && (
+                        <span className="student-unread-dot" aria-label="Unread" />
+                      )}
+
+                      <h3>{notification.title}</h3>
+                    </div>
+
+                    <p className="student-notification-preview">
+                      {notification.message}
+                    </p>
                   </div>
 
                   <span className={`notification-type-pill ${notification.type}`}>
@@ -173,6 +238,13 @@ function StudentNotifications() {
           </div>
         )}
       </section>
+
+      <AnnouncementDetailsModal
+        announcement={selectedNotification}
+        formatDate={formatDate}
+        formatType={formatType}
+        onClose={() => setSelectedNotification(null)}
+      />
     </main>
   );
 }

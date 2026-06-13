@@ -98,6 +98,20 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.student-announcement-item:hover,
+.student-announcement-item:focus {
+  border-color: rgba(201, 24, 74, 0.35);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.student-announcement-item.unread {
+  border-color: rgba(201, 24, 74, 0.35);
+  background: var(--color-surface-soft);
 }
 
 .student-announcement-title-row {
@@ -112,10 +126,31 @@
   font-size: 1rem;
 }
 
+.student-announcement-title-with-dot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-unread-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
 .student-announcement-item p {
   margin: 8px 0 0;
   color: var(--color-text-muted);
   line-height: 1.6;
+}
+
+.student-announcement-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .student-announcement-footer {

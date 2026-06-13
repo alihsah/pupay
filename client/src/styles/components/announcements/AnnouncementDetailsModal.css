@@ -1,0 +1,47 @@
+.announcement-details-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.announcement-details-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.announcement-read-label {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.announcement-details-modal .announcement-type-pill {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.announcement-details-modal .announcement-type-pill.payment_reminder {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.announcement-details-modal .announcement-type-pill.deadline {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.announcement-details-modal p {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}

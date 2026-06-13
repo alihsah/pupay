@@ -198,9 +198,13 @@ function AppRoutes() {
         <Route
           path="/student/notifications"
           element={
-            <DashboardLayout>
-              <StudentNotifications />
-            </DashboardLayout>
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["student"]}>
+                <DashboardLayout>
+                  <StudentNotifications />
+                </DashboardLayout>
+              </RoleRoute>
+            </ProtectedRoute>
           }
         />
 
