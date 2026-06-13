@@ -15,10 +15,20 @@
 @media (max-width: 768px) {
   .dashboard-main {
     margin-left: 0;
-    padding-bottom: 84px;
+    padding-bottom: 104px;
   }
 
   .dashboard-content {
-    padding: 20px 16px 28px;
+    padding: 16px 14px 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-main {
+    padding-bottom: 112px;
+  }
+
+  .dashboard-content {
+    padding: 12px 10px 28px;
   }
 }

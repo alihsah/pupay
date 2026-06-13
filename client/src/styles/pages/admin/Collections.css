@@ -554,10 +554,30 @@
 }
 
 @media (max-width: 640px) {
+  .collections-page {
+    gap: 16px;
+  }
+
   .collections-summary-grid,
   .collections-form,
   .filters-row {
     grid-template-columns: 1fr;
+  }
+
+  .collection-summary-card,
+  .collections-panel,
+  .admin-collection-card {
+    border-radius: 18px;
+  }
+
+  .collection-summary-card,
+  .collections-panel,
+  .admin-collection-card {
+    padding: 16px;
+  }
+
+  .collection-summary-card strong {
+    font-size: 1.55rem;
   }
 
   .modal-form {
@@ -580,5 +600,9 @@
 
   .admin-collection-card-meta {
     grid-template-columns: 1fr;
+  }
+
+  .admin-collection-card-actions button {
+    flex: 1 1 120px;
   }
 }

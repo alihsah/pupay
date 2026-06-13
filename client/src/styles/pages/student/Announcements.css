@@ -224,13 +224,38 @@
 }
 
 @media (max-width: 640px) {
+  .student-announcements-page {
+    gap: 16px;
+  }
+
   .student-announcement-summary-grid,
   .student-announcements-toolbar {
     grid-template-columns: 1fr;
   }
 
+  .student-announcements-toolbar {
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
   .student-announcements-toolbar .search-group {
     grid-column: auto;
+  }
+
+  .student-announcement-card,
+  .student-announcements-panel,
+  .student-announcement-item {
+    border-radius: 18px;
+  }
+
+  .student-announcement-card,
+  .student-announcements-panel,
+  .student-announcement-item {
+    padding: 16px;
+  }
+
+  .student-announcement-card strong {
+    font-size: 1.55rem;
   }
 
   .student-announcement-title-row,

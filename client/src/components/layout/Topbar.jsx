@@ -45,8 +45,8 @@ const pageTitles = {
     subtitle: "View active and upcoming payment collections.",
   },
   "/student/payments": {
-    title: "My Payments",
-    subtitle: "Track your payment history and status.",
+    title: "Payment History",
+    subtitle: "Review your payment records, status, and transaction history.",
   },
   "/student/announcements": {
     title: "Announcements",

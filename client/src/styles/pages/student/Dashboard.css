@@ -54,6 +54,10 @@
 }
 
 .student-dashboard-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
   margin-bottom: 18px;
 }
 
@@ -65,6 +69,29 @@
 .student-dashboard-panel-header p {
   margin: 6px 0 0;
   color: var(--color-text-muted);
+}
+
+.student-dashboard-view-all {
+  flex: 0 0 auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color var(--transition-fast),
+    background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.student-dashboard-view-all:hover,
+.student-dashboard-view-all:focus {
+  border-color: rgba(201, 24, 74, 0.35);
+  background: var(--color-primary-soft);
+  outline: none;
+  transform: translateY(-1px);
 }
 
 .student-dashboard-list {
@@ -83,6 +110,27 @@
   justify-content: space-between;
   gap: 14px;
   align-items: center;
+  transition: border-color var(--transition-fast),
+    background-color var(--transition-fast), box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.student-dashboard-list-item.clickable {
+  cursor: pointer;
+}
+
+.student-dashboard-list-item.clickable:hover,
+.student-dashboard-list-item.clickable:focus {
+  border-color: rgba(201, 24, 74, 0.35);
+  background: var(--color-surface-soft);
+  box-shadow: 0 14px 32px rgba(20, 20, 20, 0.08);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.student-dashboard-list-item.unread {
+  border-color: rgba(201, 24, 74, 0.28);
+  background: var(--color-surface-soft);
 }
 
 .student-dashboard-list-item strong,
@@ -94,6 +142,14 @@
   margin-top: 4px;
   color: var(--color-text-muted);
   font-size: 0.9rem;
+}
+
+.student-dashboard-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.45;
 }
 
 .student-dashboard-list-meta {
@@ -152,9 +208,24 @@
 }
 
 @media (max-width: 640px) {
+  .student-dashboard-page {
+    gap: 16px;
+  }
+
   .student-dashboard-welcome {
+    padding: 18px;
+    border-radius: 18px;
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .student-dashboard-welcome h2 {
+    font-size: 1.3rem;
+  }
+
+  .student-dashboard-panel {
+    padding: 16px;
+    border-radius: 18px;
   }
 
   .student-dashboard-stat-grid {
@@ -162,8 +233,17 @@
   }
 
   .student-dashboard-list-item {
+    padding: 12px;
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .student-dashboard-panel-header {
+    flex-direction: column;
+  }
+
+  .student-dashboard-view-all {
+    width: 100%;
   }
 
   .student-dashboard-list-meta {

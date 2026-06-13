@@ -56,9 +56,10 @@
 
 .student-collections-toolbar {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 12px;
-  margin-bottom: 22px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.6fr) minmax(220px, 0.8fr);
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 2rem;
 }
 
 .filter-group {
@@ -87,7 +88,7 @@
 .student-collection-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 1.5rem;
 }
 
 .student-collection-item {
@@ -357,10 +358,19 @@
 }
 
 @media (max-width: 640px) {
+  .student-collections-page {
+    gap: 16px;
+  }
+
   .student-collection-summary-grid,
   .student-collections-toolbar,
   .student-collection-meta-grid {
     grid-template-columns: 1fr;
+  }
+
+  .student-collections-toolbar {
+    gap: 12px;
+    margin-bottom: 18px;
   }
 
   .student-collection-main,
@@ -372,6 +382,16 @@
   .student-collection-card,
   .student-collection-item {
     border-radius: 18px;
+  }
+
+  .student-collections-panel,
+  .student-collection-card,
+  .student-collection-item {
+    padding: 16px;
+  }
+
+  .student-collection-card strong {
+    font-size: 1.45rem;
   }
 
   .student-collection-payment-panel {

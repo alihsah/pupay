@@ -70,7 +70,7 @@ const studentMenuItems = [
     path: "/student/collections",
   },
   {
-    label: "My Payments",
+    label: "Payment History",
     icon: CreditCard,
     path: "/student/payments",
   },

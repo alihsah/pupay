@@ -154,9 +154,32 @@
 
 
 @media (max-width: 800px) {
+  .settings-page {
+    gap: 16px;
+  }
+
   .settings-hero {
+    padding: 18px;
+    border-radius: 18px;
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .settings-avatar {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    font-size: 1.45rem;
+  }
+
+  .settings-hero h2 {
+    font-size: 1.25rem;
+  }
+
+  .settings-panel,
+  .settings-note {
+    padding: 16px;
+    border-radius: 18px;
   }
 
   .settings-role-pill {
@@ -165,6 +188,12 @@
 
   .settings-grid {
     grid-template-columns: 1fr;
+  }
+
+  .settings-item,
+  .settings-preference-card {
+    padding: 14px;
+    border-radius: 16px;
   }
 
   .settings-preference-card {

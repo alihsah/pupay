@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   WalletCards,
   Clock,
@@ -10,25 +11,35 @@ import {
 import { getMyCollections } from "../../services/collectionService";
 import { getStudentPayments } from "../../services/paymentService";
 import { getMyAnnouncements } from "../../services/announcementService";
+import { markNotificationRead } from "../../services/notificationService";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 
+import { AnnouncementDetailsModal } from "../../components/announcements";
 import { SummaryCard, Toast } from "../../components/ui";
 
 import "../../styles/pages/student/Dashboard.css";
 
 function StudentDashboard() {
-  const { currentUser, loading: userLoading } = useCurrentUser();
+  const navigate = useNavigate();
+  const { currentUser, loadingUser } = useCurrentUser();
 
   const [collections, setCollections] = useState([]);
   const [payments, setPayments] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
 
   const loadDashboardData = async () => {
-    if (!currentUser?.studentId) return;
+    if (!currentUser?.studentId) {
+      setCollections([]);
+      setPayments([]);
+      setAnnouncements([]);
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -52,10 +63,10 @@ function StudentDashboard() {
   };
 
   useEffect(() => {
-    if (!userLoading && currentUser?.studentId) {
+    if (!loadingUser) {
       loadDashboardData();
     }
-  }, [userLoading, currentUser?.studentId]);
+  }, [loadingUser, currentUser?.studentId]);
 
   const formatCurrency = (amount) => {
     return Number(amount || 0).toLocaleString("en-PH", {
@@ -74,6 +85,58 @@ function StudentDashboard() {
     });
   };
 
+  const formatType = (type) => {
+    if (type === "payment_reminder") return "Payment Reminder";
+    if (type === "deadline") return "Deadline";
+    return "General";
+  };
+
+  const markLocalAnnouncementRead = (announcementId) => {
+    const readAt = new Date().toISOString();
+
+    setAnnouncements((currentAnnouncements) =>
+      currentAnnouncements.map((announcement) =>
+        announcement.id === announcementId
+          ? { ...announcement, is_read: true, read_at: announcement.read_at || readAt }
+          : announcement
+      )
+    );
+
+    setSelectedAnnouncement((currentAnnouncement) =>
+      currentAnnouncement?.id === announcementId
+        ? {
+            ...currentAnnouncement,
+            is_read: true,
+            read_at: currentAnnouncement.read_at || readAt,
+          }
+        : currentAnnouncement
+    );
+  };
+
+  const openAnnouncementDetails = async (announcement) => {
+    setSelectedAnnouncement(announcement);
+
+    if (announcement.is_read) return;
+
+    try {
+      await markNotificationRead(announcement.id);
+      markLocalAnnouncementRead(announcement.id);
+      window.dispatchEvent(new Event("pupay:notifications-updated"));
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || "Failed to mark announcement as read."
+      );
+      setMessageType("error");
+    }
+  };
+
+  const handleKeyboardAction = (event, action) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      action();
+    }
+  };
+
   const totalCollections = collections.length;
   const pendingPayments = payments.filter((payment) => payment.status === "pending").length;
   const paidPayments = payments.filter((payment) => payment.status === "paid").length;
@@ -82,7 +145,7 @@ function StudentDashboard() {
   const recentAnnouncements = announcements.slice(0, 4);
   const upcomingCollections = collections.slice(0, 4);
 
-  if (userLoading || loading) {
+  if (loadingUser || loading) {
     return (
       <main className="student-dashboard-page">
         <p>Loading dashboard...</p>
@@ -150,13 +213,32 @@ function StudentDashboard() {
       <section className="student-dashboard-two-column">
         <div className="student-dashboard-panel">
           <div className="student-dashboard-panel-header">
-            <h3>Upcoming Collections</h3>
-            <p>Collections currently assigned to your section.</p>
+            <div>
+              <h3>Upcoming Collections</h3>
+              <p>Collections currently assigned to your section.</p>
+            </div>
+
+            <button
+              className="student-dashboard-view-all"
+              type="button"
+              onClick={() => navigate("/student/collections")}
+            >
+              View All
+            </button>
           </div>
 
           <div className="student-dashboard-list">
             {upcomingCollections.map((collection) => (
-              <article className="student-dashboard-list-item" key={collection.id}>
+              <article
+                className="student-dashboard-list-item clickable"
+                key={collection.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate("/student/collections")}
+                onKeyDown={(event) =>
+                  handleKeyboardAction(event, () => navigate("/student/collections"))
+                }
+              >
                 <div>
                   <strong>{collection.title}</strong>
                   <span>Due: {formatDate(collection.due_date)}</span>
@@ -181,16 +263,39 @@ function StudentDashboard() {
 
         <div className="student-dashboard-panel">
           <div className="student-dashboard-panel-header">
-            <h3>Recent Announcements</h3>
-            <p>Latest reminders and updates from the treasurer.</p>
+            <div>
+              <h3>Recent Announcements</h3>
+              <p>Latest reminders and updates from the treasurer.</p>
+            </div>
+
+            <button
+              className="student-dashboard-view-all"
+              type="button"
+              onClick={() => navigate("/student/announcements")}
+            >
+              View All
+            </button>
           </div>
 
           <div className="student-dashboard-list">
             {recentAnnouncements.map((announcement) => (
-              <article className="student-dashboard-list-item" key={announcement.id}>
+              <article
+                className={`student-dashboard-list-item clickable ${
+                  announcement.is_read ? "" : "unread"
+                }`}
+                key={announcement.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => openAnnouncementDetails(announcement)}
+                onKeyDown={(event) =>
+                  handleKeyboardAction(event, () => openAnnouncementDetails(announcement))
+                }
+              >
                 <div>
                   <strong>{announcement.title}</strong>
-                  <span>{announcement.message}</span>
+                  <span className="student-dashboard-preview">
+                    {announcement.message}
+                  </span>
                 </div>
 
                 <div className="student-dashboard-list-meta">
@@ -209,6 +314,13 @@ function StudentDashboard() {
           </div>
         </div>
       </section>
+
+      <AnnouncementDetailsModal
+        announcement={selectedAnnouncement}
+        formatDate={formatDate}
+        formatType={formatType}
+        onClose={() => setSelectedAnnouncement(null)}
+      />
     </main>
   );
 }

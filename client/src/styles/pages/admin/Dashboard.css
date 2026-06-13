@@ -235,16 +235,50 @@
 }
 
 @media (max-width: 640px) {
+  .admin-dashboard-page {
+    gap: 16px;
+  }
+
   .dashboard-welcome-card {
+    padding: 18px;
+    border-radius: 18px;
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .dashboard-welcome-card h2 {
+    font-size: 1.3rem;
+  }
+
+  .dashboard-welcome-card > strong {
+    font-size: 1.5rem;
   }
 
   .dashboard-stat-grid {
     grid-template-columns: 1fr;
   }
 
+  .dashboard-stat-card,
+  .dashboard-panel {
+    border-radius: 18px;
+  }
+
+  .dashboard-stat-card,
+  .dashboard-panel {
+    padding: 16px;
+  }
+
+  .dashboard-panel-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .section-link-btn {
+    width: 100%;
+  }
+
   .dashboard-list-item {
+    padding: 12px;
     flex-direction: column;
     align-items: flex-start;
   }
