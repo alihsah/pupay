@@ -3,8 +3,10 @@ function AnnouncementTable({
   onEdit,
   onArchive,
   onRestore,
+  onView,
   formatAudience,
   formatDate,
+  formatType,
 }) {
   return (
     <div className="announcements-table-wrap">
@@ -24,11 +26,16 @@ function AnnouncementTable({
           {announcements.map((announcement) => (
             <tr key={announcement.id}>
               <td>
-                <span>{announcement.title}</span>
-                <small>{announcement.message}</small>
+                <span className="announcement-title-text">
+                  {announcement.title}
+                </span>
               </td>
 
-              <td>{announcement.type.replace("_", " ")}</td>
+              <td>
+                <span className={`admin-announcement-type-pill ${announcement.type}`}>
+                  {formatType(announcement.type)}
+                </span>
+              </td>
 
               <td>{formatAudience(announcement)}</td>
 
@@ -42,6 +49,10 @@ function AnnouncementTable({
 
               <td>
                 <div className="announcements-actions">
+                  <button type="button" onClick={() => onView(announcement)}>
+                    View
+                  </button>
+
                   <button type="button" onClick={() => onEdit(announcement)}>
                     Edit
                   </button>

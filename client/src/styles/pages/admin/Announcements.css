@@ -145,6 +145,41 @@
   max-width: 420px;
 }
 
+.announcement-title-text {
+  color: var(--color-text);
+  font-weight: 800;
+}
+
+.announcement-message-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.45;
+}
+
+.admin-announcement-type-pill {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.admin-announcement-type-pill.payment_reminder {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.admin-announcement-type-pill.deadline {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
 .announcements-actions {
   display: flex;
   flex-wrap: wrap;

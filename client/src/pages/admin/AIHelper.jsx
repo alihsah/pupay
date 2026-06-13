@@ -27,11 +27,41 @@ import { Toast } from "../../components/ui";
 
 import "../../styles/pages/admin/AIHelper.css";
 
+const AI_TOOL_TABS = [
+  {
+    id: "reminder",
+    label: "Reminder Generator",
+    description: "Create a payment reminder with tone and reminder type.",
+    icon: MessageSquareText,
+  },
+  {
+    id: "summary",
+    label: "Collection Summary",
+    description: "Summarize progress and recommend an admin action.",
+    icon: FileText,
+  },
+  {
+    id: "announcement",
+    label: "Announcement Generator",
+    description: "Draft a student-friendly announcement.",
+    icon: Megaphone,
+  },
+];
+
 const normalizeCollectionList = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.collections)) return data.collections;
-  if (Array.isArray(data?.data)) return data.data;
-  return [];
+  const candidates = [
+    data,
+    data?.collections,
+    data?.data,
+    data?.data?.collections,
+    data?.result,
+    data?.result?.collections,
+    data?.items,
+  ];
+
+  const collectionList = candidates.find(Array.isArray) || [];
+
+  return collectionList.filter((collection) => collection?.id);
 };
 
 function AIHelper() {
@@ -51,6 +81,7 @@ function AIHelper() {
   const [activeOutputType, setActiveOutputType] = useState("");
   const [generatedText, setGeneratedText] = useState("");
   const [source, setSource] = useState("");
+  const [activeTool, setActiveTool] = useState("reminder");
 
   const [loadingCollections, setLoadingCollections] = useState(true);
   const [loadingCollectionData, setLoadingCollectionData] = useState(false);
@@ -64,6 +95,10 @@ function AIHelper() {
       (collection) => String(collection.id) === String(selectedCollectionId)
     );
   }, [collections, selectedCollectionId]);
+
+  const selectedTool = useMemo(() => {
+    return AI_TOOL_TABS.find((tool) => tool.id === activeTool);
+  }, [activeTool]);
 
   const stats = useMemo(() => {
     const totalStudents = payments.length;
@@ -99,9 +134,15 @@ function AIHelper() {
 
       setCollections(collectionList);
 
-      if (collectionList.length > 0) {
-        setSelectedCollectionId(String(collectionList[0].id));
-      }
+      setSelectedCollectionId((currentId) => {
+        const currentCollectionStillExists = collectionList.some(
+          (collection) => String(collection.id) === String(currentId)
+        );
+
+        if (currentCollectionStillExists) return currentId;
+        if (collectionList.length > 0) return String(collectionList[0].id);
+        return "";
+      });
     } catch (error) {
       setMessage(
         error.response?.data?.message || "Failed to load collections."
@@ -145,6 +186,12 @@ function AIHelper() {
       setSource("");
       setActiveOutputType("");
       loadSelectedCollectionData(selectedCollectionId);
+    } else {
+      setPayments([]);
+      setProgress(null);
+      setGeneratedText("");
+      setSource("");
+      setActiveOutputType("");
     }
   }, [selectedCollectionId]);
 
@@ -330,6 +377,7 @@ function AIHelper() {
       <section className="ai-helper-layout">
         <div className="ai-helper-control-panel">
           <div className="ai-helper-panel-header">
+            <span className="ai-helper-step-label">Step 1</span>
             <h3>Collection Source</h3>
             <p>Select a collection so the AI can use its payment progress.</p>
           </div>
@@ -427,106 +475,166 @@ function AIHelper() {
 
         <div className="ai-helper-tools-panel">
           <div className="ai-helper-panel-header">
+            <span className="ai-helper-step-label">Step 2</span>
             <h3>AI Tools</h3>
             <p>Choose what you want PUPay AI to generate for this collection.</p>
           </div>
 
-          <div className="ai-helper-options-grid">
-            <label className="ai-helper-field">
-              <span>Tone</span>
+          <div className="ai-helper-tool-tabs" role="tablist" aria-label="AI tools">
+            {AI_TOOL_TABS.map((tool) => {
+              const ToolIcon = tool.icon;
 
-              <select value={tone} onChange={(event) => setTone(event.target.value)}>
-                <option value="friendly">Friendly</option>
-                <option value="formal">Formal</option>
-                <option value="urgent">Urgent</option>
-              </select>
-            </label>
-
-            <label className="ai-helper-field">
-              <span>Reminder Type</span>
-
-              <select
-                value={reminderType}
-                onChange={(event) => setReminderType(event.target.value)}
-              >
-                <option value="general">General Reminder</option>
-                <option value="pending">Pending Payments</option>
-                <option value="overdue">Overdue Payments</option>
-                <option value="final">Final Reminder</option>
-              </select>
-            </label>
+              return (
+                <button
+                  key={tool.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTool === tool.id}
+                  className={activeTool === tool.id ? "active" : ""}
+                  onClick={() => setActiveTool(tool.id)}
+                >
+                  <ToolIcon size={17} />
+                  <span>{tool.label}</span>
+                </button>
+              );
+            })}
           </div>
 
-          <label className="ai-helper-field">
-            <span>Announcement Instruction</span>
-
-            <textarea
-              value={instruction}
-              onChange={(event) => setInstruction(event.target.value)}
-              placeholder="Example: Remind students that payment is due tomorrow."
-              rows="4"
-            />
-          </label>
-
-          <div className="ai-helper-tool-grid">
-            <button
-              type="button"
-              className="ai-helper-tool-card"
-              onClick={handleGenerateReminder}
-              disabled={!!generatingType || loadingCollectionData}
-            >
-              <MessageSquareText size={22} />
-              <span>Generate Reminder</span>
-              <small>Generate a payment reminder for students.</small>
-
-              {generatingType === "reminder" && (
-                <em>
-                  <Loader2 size={14} />
-                  Generating...
-                </em>
+          <div className="ai-helper-tool-config">
+            <div className="ai-helper-selected-tool">
+              {selectedTool && (
+                <>
+                  <strong>{selectedTool.label}</strong>
+                  <p>{selectedTool.description}</p>
+                </>
               )}
-            </button>
+            </div>
 
-            <button
-              type="button"
-              className="ai-helper-tool-card"
-              onClick={handleGenerateSummary}
-              disabled={!!generatingType || loadingCollectionData}
-            >
-              <FileText size={22} />
-              <span>Generate Collection Summary</span>
-              <small>Summarize progress and recommend the next admin action.</small>
+            {activeTool === "reminder" && (
+              <>
+                <div className="ai-helper-options-grid">
+                  <label className="ai-helper-field">
+                    <span>Tone</span>
 
-              {generatingType === "summary" && (
-                <em>
-                  <Loader2 size={14} />
-                  Generating...
-                </em>
-              )}
-            </button>
+                    <select
+                      value={tone}
+                      onChange={(event) => setTone(event.target.value)}
+                    >
+                      <option value="friendly">Friendly</option>
+                      <option value="formal">Formal</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </label>
 
-            <button
-              type="button"
-              className="ai-helper-tool-card"
-              onClick={handleGenerateAnnouncement}
-              disabled={!!generatingType || loadingCollectionData}
-            >
-              <Megaphone size={22} />
-              <span>Generate Announcement</span>
-              <small>Draft a student-friendly announcement to copy later.</small>
+                  <label className="ai-helper-field">
+                    <span>Reminder Type</span>
 
-              {generatingType === "announcement" && (
-                <em>
-                  <Loader2 size={14} />
-                  Generating...
-                </em>
-              )}
-            </button>
+                    <select
+                      value={reminderType}
+                      onChange={(event) => setReminderType(event.target.value)}
+                    >
+                      <option value="general">General Reminder</option>
+                      <option value="pending">Pending Payments</option>
+                      <option value="overdue">Overdue Payments</option>
+                      <option value="final">Final Reminder</option>
+                    </select>
+                  </label>
+                </div>
+
+                <button
+                  type="button"
+                  className="ai-helper-generate-btn"
+                  onClick={handleGenerateReminder}
+                  disabled={
+                    !!generatingType || loadingCollectionData || !selectedCollection
+                  }
+                >
+                  {generatingType === "reminder" ? (
+                    <>
+                      <Loader2 size={16} />
+                      Generating Reminder...
+                    </>
+                  ) : (
+                    <>
+                      <MessageSquareText size={16} />
+                      Generate Reminder
+                    </>
+                  )}
+                </button>
+              </>
+            )}
+
+            {activeTool === "summary" && (
+              <div className="ai-helper-summary-tool">
+                <p>
+                  Uses the selected collection, progress, and payment stats to
+                  produce a short admin-facing summary.
+                </p>
+
+                <button
+                  type="button"
+                  className="ai-helper-generate-btn"
+                  onClick={handleGenerateSummary}
+                  disabled={
+                    !!generatingType || loadingCollectionData || !selectedCollection
+                  }
+                >
+                  {generatingType === "summary" ? (
+                    <>
+                      <Loader2 size={16} />
+                      Generating Summary...
+                    </>
+                  ) : (
+                    <>
+                      <FileText size={16} />
+                      Generate Summary
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {activeTool === "announcement" && (
+              <>
+                <label className="ai-helper-field">
+                  <span>Announcement Instruction</span>
+
+                  <textarea
+                    value={instruction}
+                    onChange={(event) => setInstruction(event.target.value)}
+                    placeholder="Example: Remind students that payment is due tomorrow."
+                    rows="4"
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  className="ai-helper-generate-btn"
+                  onClick={handleGenerateAnnouncement}
+                  disabled={
+                    !!generatingType || loadingCollectionData || !selectedCollection
+                  }
+                >
+                  {generatingType === "announcement" ? (
+                    <>
+                      <Loader2 size={16} />
+                      Generating Announcement...
+                    </>
+                  ) : (
+                    <>
+                      <Megaphone size={16} />
+                      Generate Announcement
+                    </>
+                  )}
+                </button>
+              </>
+            )}
           </div>
 
           <div className="ai-helper-output-panel">
             <div className="ai-helper-output-header">
               <div>
+                <span className="ai-helper-step-label">Step 3</span>
                 <h3>
                   {activeOutputType
                     ? outputTitle[activeOutputType]

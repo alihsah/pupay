@@ -75,11 +75,6 @@ const studentMenuItems = [
     path: "/student/payments",
   },
   {
-    label: "Announcements",
-    icon: Megaphone,
-    path: "/student/announcements",
-  },
-  {
     label: "Profile",
     icon: UserRound,
     path: "/student/profile",

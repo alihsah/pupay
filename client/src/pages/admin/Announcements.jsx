@@ -10,6 +10,7 @@ import {
 
 import {
   AnnouncementFilters,
+  AnnouncementDetailsModal,
   AnnouncementModal,
   AnnouncementTable,
 } from "../../components/announcements";
@@ -38,6 +39,7 @@ function AdminAnnouncements() {
 
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("create");
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [isCreatingAnnouncement, setIsCreatingAnnouncement] = useState(false);
@@ -203,7 +205,13 @@ function AdminAnnouncements() {
     if (announcement.year_level !== "ALL") parts.push(announcement.year_level);
     if (announcement.section !== "ALL") parts.push(`Section ${announcement.section}`);
 
-    return parts.join(" • ");
+    return parts.join(" / ");
+  };
+
+  const formatType = (type) => {
+    if (type === "payment_reminder") return "Payment Reminder";
+    if (type === "deadline") return "Deadline";
+    return "General";
   };
 
   const formatDate = (date) => {
@@ -299,14 +307,28 @@ function AdminAnnouncements() {
         ) : (
           <AnnouncementTable
             announcements={filteredAnnouncements}
+            onView={setSelectedAnnouncement}
             onEdit={openEditModal}
             onArchive={handleArchive}
             onRestore={handleRestore}
             formatAudience={formatAudience}
             formatDate={formatDate}
+            formatType={formatType}
           />
         )}
       </section>
+
+      {selectedAnnouncement && (
+        <AnnouncementDetailsModal
+          announcement={selectedAnnouncement}
+          formatAudience={formatAudience}
+          formatDate={formatDate}
+          formatType={formatType}
+          onClose={() => setSelectedAnnouncement(null)}
+          showAudience
+          showStatus
+        />
+      )}
 
       {showModal && (
         <AnnouncementModal
