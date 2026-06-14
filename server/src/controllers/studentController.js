@@ -1,5 +1,19 @@
 import db from "../config/db.js";
 import ExcelJS from "exceljs";
+import { assignStudentToMatchingActiveCollections } from "../services/studentCollectionAssignmentService.js";
+
+const assignMatchingCollectionsSafely = async (studentId, context) => {
+  try {
+    return await assignStudentToMatchingActiveCollections(studentId);
+  } catch (error) {
+    console.warn(
+      `Student collection assignment failed after ${context}:`,
+      error?.message || error
+    );
+
+    return { assignedCount: 0, failed: true };
+  }
+};
 
 export const countTargetStudents = async (req, res) => {
   try {
@@ -126,7 +140,7 @@ export const createStudent = async (req, res) => {
       });
     }
 
-    await db.query(
+    const [result] = await db.query(
       `
       INSERT INTO students (
         student_number,
@@ -149,6 +163,10 @@ export const createStudent = async (req, res) => {
         status,
       ]
     );
+
+    if (status === "active") {
+      await assignMatchingCollectionsSafely(result.insertId, "student creation");
+    }
 
     res.status(201).json({ message: "Student created successfully." });
   } catch (error) {
@@ -178,6 +196,8 @@ export const updateStudent = async (req, res) => {
       status,
     } = req.body;
 
+    const nextStatus = status || "active";
+
     await db.query(
       `
       UPDATE students
@@ -198,10 +218,14 @@ export const updateStudent = async (req, res) => {
         course || null,
         year_level || null,
         section || null,
-        status || "active",
+        nextStatus,
         id,
       ]
     );
+
+    if (nextStatus === "active") {
+      await assignMatchingCollectionsSafely(id, "student update");
+    }
 
     res.status(200).json({ message: "Student updated successfully." });
   } catch (error) {
@@ -236,6 +260,10 @@ export const updateStudentStatus = async (req, res) => {
       `,
       [status, id]
     );
+
+    if (status === "active") {
+      await assignMatchingCollectionsSafely(id, "student status update");
+    }
 
     res.status(200).json({ message: "Student status updated successfully." });
   } catch (error) {
@@ -346,9 +374,16 @@ export const importStudents = async (req, res) => {
           ]
         );
 
+        if (status === "active") {
+          await assignMatchingCollectionsSafely(
+            existing[0].id,
+            "student import update"
+          );
+        }
+
         updated++;
       } else {
-        await db.query(
+        const [result] = await db.query(
           `
           INSERT INTO students (
             student_number,
@@ -371,6 +406,13 @@ export const importStudents = async (req, res) => {
             status,
           ]
         );
+
+        if (status === "active") {
+          await assignMatchingCollectionsSafely(
+            result.insertId,
+            "student import insert"
+          );
+        }
 
         inserted++;
       }
