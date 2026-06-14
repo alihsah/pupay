@@ -167,7 +167,7 @@ EMAIL_FROM_NAME=PUPay
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/PUPay-Final.git
+git clone https://github.com/AlihCA/PUPay-Final.git
 cd PUPay-Final
 ```
 
