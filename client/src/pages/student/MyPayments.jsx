@@ -236,7 +236,12 @@ function StudentPayments() {
         </div>
 
         <div className="student-payment-list">
-          {filteredPayments.map((payment) => (
+          {filteredPayments.map((payment) => {
+            const isCollectionClosed =
+              payment.collection_status !== "active" ||
+              Number(payment.collection_is_locked || 0) === 1;
+
+            return (
             <article className="student-payment-item" key={payment.id}>
               <div className="student-payment-main">
                 <h3>{payment.collection_title}</h3>
@@ -271,7 +276,7 @@ function StudentPayments() {
                     : "Not yet paid"}
                 </small>
 
-                {payment.status !== "paid" && (
+                {payment.status !== "paid" && !isCollectionClosed && (
                   <button
                     className="student-pay-online-btn"
                     type="button"
@@ -292,7 +297,8 @@ function StudentPayments() {
                 )}
               </div>
             </article>
-          ))}
+            );
+          })}
 
           {filteredPayments.length === 0 && (
             <div className="student-payments-empty">

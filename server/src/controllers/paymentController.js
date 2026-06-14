@@ -1,6 +1,10 @@
 import db from "../config/db.js";
 import axios from "axios";
 import crypto from "crypto";
+import {
+  getCollectionLockState,
+  syncCollectionLockStatus,
+} from "../services/collectionLockService.js";
 
 const parsePayMongoSignature = (signatureHeader) => {
   if (!signatureHeader) return null;
@@ -133,7 +137,7 @@ export const handlePayMongoWebhook = async (req, res) => {
       ]
     );
 
-    await updateCollectionLockStatus(payment.collection_id);
+    await syncCollectionLockStatus(payment.collection_id);
 
     return res.status(200).json({
       message: "Payment updated from PayMongo webhook.",
@@ -145,58 +149,6 @@ export const handlePayMongoWebhook = async (req, res) => {
     return res.status(500).json({
       message: "Failed to process PayMongo webhook.",
     });
-  }
-};
-
-const updateCollectionLockStatus = async (collectionId) => {
-  const [collections] = await db.query(
-    `
-    SELECT id, goal_amount, is_locked
-    FROM collections
-    WHERE id = ?
-    `,
-    [collectionId]
-  );
-
-  if (collections.length === 0) return;
-
-  const collection = collections[0];
-
-  const [totals] = await db.query(
-    `
-    SELECT COALESCE(SUM(amount_paid), 0) AS total_collected
-    FROM payments
-    WHERE collection_id = ?
-    `,
-    [collectionId]
-  );
-
-  const totalCollected = Number(totals[0].total_collected || 0);
-  const goalAmount = Number(collection.goal_amount || 0);
-
-  if (goalAmount > 0 && totalCollected >= goalAmount) {
-    await db.query(
-      `
-      UPDATE collections
-      SET
-        is_locked = TRUE,
-        locked_at = COALESCE(locked_at, NOW()),
-        status = 'closed'
-      WHERE id = ?
-      `,
-      [collectionId]
-    );
-  } else {
-    await db.query(
-      `
-      UPDATE collections
-      SET
-        is_locked = FALSE,
-        locked_at = NULL
-      WHERE id = ?
-      `,
-      [collectionId]
-    );
   }
 };
 
@@ -309,7 +261,9 @@ export const getPaymentsByStudentId = async (req, res) => {
 
         collections.title AS collection_title,
         collections.description AS collection_description,
-        collections.due_date
+        collections.due_date,
+        collections.status AS collection_status,
+        collections.is_locked AS collection_is_locked
       FROM payments
       JOIN collections ON payments.collection_id = collections.id
       WHERE payments.student_id = ?
@@ -459,7 +413,7 @@ export const updatePaymentStatus = async (req, res) => {
       ]
     );
 
-    await updateCollectionLockStatus(existingPayment.collection_id);
+    await syncCollectionLockStatus(existingPayment.collection_id);
 
     res.status(200).json({ message: "Payment status updated successfully." });
   } catch (error) {
@@ -485,7 +439,9 @@ export const createPayMongoCheckout = async (req, res) => {
         students.full_name,
         students.personal_email,
 
-        collections.title AS collection_title
+        collections.title AS collection_title,
+        collections.status AS collection_status,
+        collections.is_locked AS collection_is_locked
       FROM payments
       JOIN students ON payments.student_id = students.id
       JOIN collections ON payments.collection_id = collections.id
@@ -505,6 +461,21 @@ export const createPayMongoCheckout = async (req, res) => {
     if (payment.status === "paid") {
       return res.status(400).json({
         message: "This payment is already marked as paid.",
+      });
+    }
+
+    const lockState = await getCollectionLockState(payment.collection_id);
+
+    if (lockState?.shouldLock) {
+      await syncCollectionLockStatus(payment.collection_id);
+    }
+
+    const isCollectionLocked =
+      lockState?.shouldLock || Number(payment.collection_is_locked || 0) === 1;
+
+    if (payment.collection_status !== "active" || isCollectionLocked) {
+      return res.status(400).json({
+        message: "This collection is closed for payments.",
       });
     }
 

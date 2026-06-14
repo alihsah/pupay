@@ -1,5 +1,9 @@
 import db from "../config/db.js";
 import { sendAnnouncementEmailNotifications } from "../services/emailService.js";
+import {
+  getCollectionLockState,
+  syncCollectionLockStatus,
+} from "../services/collectionLockService.js";
 
 const formatCollectionDueDate = (dueDate) => {
   if (!dueDate) return null;
@@ -627,41 +631,7 @@ export const updateCollection = async (req, res) => {
       );
     }
 
-    const [totals] = await connection.query(
-      `
-      SELECT COALESCE(SUM(amount_paid), 0) AS total_collected
-      FROM payments
-      WHERE collection_id = ?
-      `,
-      [id]
-    );
-
-    const totalCollected = Number(totals[0].total_collected || 0);
-
-    if (totalCollected >= finalGoalAmount) {
-      await connection.query(
-        `
-        UPDATE collections
-        SET
-          is_locked = TRUE,
-          locked_at = COALESCE(locked_at, NOW()),
-          status = IF(status = 'archived', 'archived', 'closed')
-        WHERE id = ?
-        `,
-        [id]
-      );
-    } else {
-      await connection.query(
-        `
-        UPDATE collections
-        SET
-          is_locked = FALSE,
-          locked_at = NULL
-        WHERE id = ?
-        `,
-        [id]
-      );
-    }
+    await syncCollectionLockStatus(id, connection);
 
     await connection.commit();
 
@@ -733,6 +703,21 @@ export const updateCollectionStatus = async (req, res) => {
         [id]
       );
     } else {
+      const lockState = await getCollectionLockState(id);
+
+      if (!lockState) {
+        return res.status(404).json({ message: "Collection not found." });
+      }
+
+      if (lockState.shouldLock) {
+        await syncCollectionLockStatus(id);
+
+        return res.status(400).json({
+          message:
+            "This collection has reached its target goal and cannot be reopened.",
+        });
+      }
+
       await db.query(
         `
         UPDATE collections
@@ -775,6 +760,8 @@ export const getMyCollections = async (req, res) => {
         section,
         due_date,
         status,
+        is_locked,
+        locked_at,
         created_at,
         updated_at
       FROM collections

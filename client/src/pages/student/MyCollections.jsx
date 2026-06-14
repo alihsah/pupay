@@ -146,9 +146,14 @@ function StudentCollections() {
   const getCollectionDisplayStatus = (collection) => {
     const progress = collectionProgress[collection.id];
     const payment = paymentsByCollection[collection.id];
-    const isLocked = progress?.isLocked || collection.is_locked;
+    const isLocked =
+      Boolean(progress?.isLocked) || Number(collection.is_locked || 0) === 1;
 
-    return payment?.status || (isLocked ? "locked" : collection.status);
+    if (isLocked || collection.status === "closed") {
+      return "locked";
+    }
+
+    return payment?.status || collection.status;
   };
 
   const filteredCollections = collections
@@ -286,7 +291,12 @@ function StudentCollections() {
               );
               const amountPaid = Number(payment?.amount_paid || 0);
               const balance = getPaymentBalance(payment, collection, progress);
-              const canPayOnline = payment && payment.status !== "paid";
+              const isCollectionClosed =
+                collection.status !== "active" ||
+                Boolean(progress?.isLocked) ||
+                Number(collection.is_locked || 0) === 1;
+              const canPayOnline =
+                payment && payment.status !== "paid" && !isCollectionClosed;
 
               return (
                 <article className="student-collection-item" key={collection.id}>

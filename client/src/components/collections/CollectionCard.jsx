@@ -9,10 +9,15 @@ function CollectionCard({
   formatAudience,
 }) {
   const progressValue = progress?.progress || 0;
-  const isLocked = Boolean(progress?.isLocked || collection.is_locked);
+  const isLocked =
+    Boolean(progress?.isLocked) || Number(collection.is_locked || 0) === 1;
   const isArchived = collection.status === "archived";
   const isClosed = collection.status === "closed" || isLocked;
-  const statusLabel = isArchived ? "archived" : isClosed ? "closed" : collection.status;
+  const goalAmount = Number(progress?.goalAmount || collection.goal_amount || 0);
+  const totalCollected = Number(progress?.totalCollected || 0);
+  const isGoalReached = goalAmount > 0 && totalCollected >= goalAmount;
+  const canReopen = isClosed && !isArchived && !isGoalReached;
+  const statusLabel = isArchived ? "archived" : isLocked ? "locked" : collection.status;
 
   const handleActionClick = (event, action) => {
     event.stopPropagation();
@@ -100,7 +105,7 @@ function CollectionCard({
           </button>
         )}
 
-        {!isArchived && isClosed && (
+        {canReopen && (
           <button
             type="button"
             onClick={(event) =>
