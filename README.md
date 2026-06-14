@@ -8,7 +8,7 @@ The system includes separate portals for Admin/Treasurer users and Student users
 
 ## Project Overview
 
-PUPay was developed to make student payment collection easier, more transparent, and more organized. Instead of manually tracking collections, payments, reminders, and announcements, the system provides a centralized platform where admins can manage collection records and students can view their assigned collections, payment history, notifications, and receipts.
+PUPay was developed to make student payment collection easier, more transparent, and more organized. Instead of manually tracking collections, payments, reminders, and announcements, the system provides a centralized platform where admins can manage collection records and students can view their assigned collections, payment history, notifications, and receipts. test
 
 ---
 
