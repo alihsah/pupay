@@ -9,7 +9,10 @@ function CollectionCard({
   formatAudience,
 }) {
   const progressValue = progress?.progress || 0;
-  const isLocked = progress?.isLocked || collection.is_locked;
+  const isLocked = Boolean(progress?.isLocked || collection.is_locked);
+  const isArchived = collection.status === "archived";
+  const isClosed = collection.status === "closed" || isLocked;
+  const statusLabel = isArchived ? "archived" : isClosed ? "closed" : collection.status;
 
   const handleActionClick = (event, action) => {
     event.stopPropagation();
@@ -24,8 +27,8 @@ function CollectionCard({
           <p>{collection.description || "No description provided."}</p>
         </div>
 
-        <span className={`status-pill ${isLocked ? "locked" : collection.status}`}>
-          {isLocked ? "locked" : collection.status}
+        <span className={`status-pill ${statusLabel}`}>
+          {statusLabel}
         </span>
       </div>
 
@@ -86,7 +89,7 @@ function CollectionCard({
           Edit
         </button>
 
-        {collection.status !== "closed" && !isLocked && (
+        {!isArchived && !isClosed && (
           <button
             type="button"
             onClick={(event) =>
@@ -97,7 +100,7 @@ function CollectionCard({
           </button>
         )}
 
-        {collection.status !== "active" && !isLocked && (
+        {!isArchived && isClosed && (
           <button
             type="button"
             onClick={(event) =>
@@ -108,7 +111,7 @@ function CollectionCard({
           </button>
         )}
 
-        {collection.status !== "archived" && (
+        {!isArchived && (
           <button
             type="button"
             onClick={(event) =>

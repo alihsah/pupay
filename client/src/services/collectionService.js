@@ -30,7 +30,10 @@ export const updateCollection = async (id, collectionData) => {
   return response.data;
 };
 
-export const updateCollectionStatus = async (id, status) => {
-  const response = await api.patch(`/collections/${id}/status`, { status });
+export const updateCollectionStatus = async (id, status, options = {}) => {
+  const response = await api.patch(`/collections/${id}/status`, {
+    status,
+    ...options,
+  });
   return response.data;
 };

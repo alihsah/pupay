@@ -687,7 +687,7 @@ export const updateCollection = async (req, res) => {
 export const updateCollectionStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, restore = false } = req.body;
 
     if (!["active", "closed", "archived"].includes(status)) {
       return res.status(400).json({
@@ -695,14 +695,56 @@ export const updateCollectionStatus = async (req, res) => {
       });
     }
 
-    await db.query(
-      `
-      UPDATE collections
-      SET status = ?
-      WHERE id = ?
-      `,
-      [status, id]
-    );
+    if (status === "archived") {
+      await db.query(
+        `
+        UPDATE collections
+        SET
+          is_locked = IF(status = 'closed', TRUE, is_locked),
+          locked_at = IF(
+            status = 'closed',
+            COALESCE(locked_at, NOW()),
+            locked_at
+          ),
+          status = 'archived'
+        WHERE id = ?
+        `,
+        [id]
+      );
+    } else if (status === "closed") {
+      await db.query(
+        `
+        UPDATE collections
+        SET
+          status = 'closed',
+          is_locked = TRUE,
+          locked_at = COALESCE(locked_at, NOW())
+        WHERE id = ?
+        `,
+        [id]
+      );
+    } else if (restore) {
+      await db.query(
+        `
+        UPDATE collections
+        SET status = IF(is_locked = TRUE, 'closed', 'active')
+        WHERE id = ?
+        `,
+        [id]
+      );
+    } else {
+      await db.query(
+        `
+        UPDATE collections
+        SET
+          status = 'active',
+          is_locked = FALSE,
+          locked_at = NULL
+        WHERE id = ?
+        `,
+        [id]
+      );
+    }
 
     res.status(200).json({ message: "Collection status updated successfully." });
   } catch (error) {

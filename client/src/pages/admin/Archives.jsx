@@ -92,7 +92,7 @@ function AdminArchives() {
     try {
       setRestoringCollectionId(collection.id);
 
-      await updateCollectionStatus(collection.id, "active");
+      await updateCollectionStatus(collection.id, "active", { restore: true });
 
       setMessage("Collection restored successfully.");
       setMessageType("success");
