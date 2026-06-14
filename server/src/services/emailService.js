@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import db from "../config/db.js";
 
 const isEmailNotificationsEnabled = () =>
@@ -26,23 +26,47 @@ const formatFromName = (fromName) =>
     .replace(/"/g, '\\"')
     .trim() || "PUPay";
 
+const formatSenderAddress = ({ from, fromName }) => {
+  const sanitizedFrom = String(from || "").replace(/[\r\n]/g, " ").trim();
+
+  if (sanitizedFrom.includes("<")) {
+    return sanitizedFrom;
+  }
+
+  return `"${formatFromName(fromName)}" <${sanitizedFrom}>`;
+};
+
+const getSafeErrorMessage = (error) => {
+  const apiKey = process.env.RESEND_API_KEY;
+  const message = error?.message || error?.name || "Unknown Resend error";
+
+  if (!apiKey) {
+    return message;
+  }
+
+  return String(message).replaceAll(apiKey, "[redacted]");
+};
+
 const getEmailConfig = () => {
   if (!isEmailNotificationsEnabled()) {
     return null;
   }
 
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const from = process.env.RESEND_FROM?.trim();
   const fromName = process.env.EMAIL_FROM_NAME || "PUPay";
 
-  if (!user || !pass) {
+  if (!apiKey || !from) {
     console.warn(
-      "Email notifications are enabled, but GMAIL_USER or GMAIL_APP_PASSWORD is missing."
+      "Email notifications are enabled, but RESEND_API_KEY or RESEND_FROM is missing."
     );
     return null;
   }
 
-  return { user, pass, fromName };
+  return {
+    apiKey,
+    from: formatSenderAddress({ from, fromName }),
+  };
 };
 
 const getAnnouncementRecipients = async ({ course, year_level, section }) => {
@@ -146,29 +170,38 @@ export const sendAnnouncementEmailNotifications = async (announcement) => {
     return { skipped: true, reason: "no_matching_recipients" };
   }
 
-   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    family: 4,
-    auth: {
-      user: config.user,
-      pass: config.pass,
-    },
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000,
-  });
-
+  const resend = new Resend(config.apiKey);
   const email = buildAnnouncementEmail(announcement);
 
-  await transporter.sendMail({
-    from: `"${formatFromName(config.fromName)}" <${config.user}>`,
-    bcc: recipients.map((recipient) => recipient.email),
-    subject: email.subject,
-    text: email.text,
-    html: email.html,
-  });
+  const results = await Promise.allSettled(
+    recipients.map((recipient) =>
+      resend.emails.send({
+        from: config.from,
+        to: [recipient.email],
+        subject: email.subject,
+        text: email.text,
+        html: email.html,
+      })
+    )
+  );
+
+  const failedResults = results.filter(
+    (result) => result.status === "rejected" || result.value?.error
+  );
+
+  if (failedResults.length > 0) {
+    const firstFailure = failedResults[0];
+    const error =
+      firstFailure.status === "rejected"
+        ? firstFailure.reason
+        : firstFailure.value.error;
+
+    throw new Error(
+      `Resend email notification failed for ${failedResults.length} of ${
+        recipients.length
+      } recipient(s): ${getSafeErrorMessage(error)}`
+    );
+  }
 
   return { sent: true, recipientCount: recipients.length };
 };
