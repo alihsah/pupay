@@ -146,12 +146,18 @@ export const sendAnnouncementEmailNotifications = async (announcement) => {
     return { skipped: true, reason: "no_matching_recipients" };
   }
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
+   const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    family: 4,
     auth: {
       user: config.user,
       pass: config.pass,
     },
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
   });
 
   const email = buildAnnouncementEmail(announcement);
