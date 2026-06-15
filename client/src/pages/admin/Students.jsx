@@ -264,7 +264,7 @@ function Students() {
           name="student_number"
           value={values.student_number}
           onChange={onChange}
-          placeholder="Enter Student Number"
+          placeholder="2023-123456-PQ-0"
           required
         />
       </div>
@@ -275,7 +275,7 @@ function Students() {
           name="full_name"
           value={values.full_name}
           onChange={onChange}
-          placeholder="Enter Full Name"
+          placeholder="LastName, FirstName Initial"
           required
         />
       </div>
