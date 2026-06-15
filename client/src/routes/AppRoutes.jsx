@@ -6,6 +6,7 @@ import Landing from "../pages/auth/Landing";
 import SignInPage from "../pages/auth/SignInPage";
 import SignUpPage from "../pages/auth/SignUpPage";
 import Unauthorized from "../pages/auth/Unauthorized";
+import UnverifiedUser from "../pages/auth/UnverifiedUser";
 import NotFound from "../pages/auth/NotFound";
 
 import ClerkTokenProvider from "./ClerkTokenProvider";
@@ -38,6 +39,14 @@ function AppRoutes() {
         <Route path="/sign-in/*" element={<SignInPage />} />
         <Route path="/sign-up/*" element={<SignUpPage />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route
+          path="/unverified"
+          element={
+            <ProtectedRoute>
+              <UnverifiedUser />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/dashboard"

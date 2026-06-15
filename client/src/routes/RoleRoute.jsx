@@ -2,9 +2,12 @@ import { Navigate } from "react-router-dom";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 
 function RoleRoute({ allowedRoles, children }) {
-  const { currentUser, loadingUser, authError } = useCurrentUser();
+  const { currentUser, loadingUser, authError, isUnverifiedUser } =
+    useCurrentUser();
 
   if (loadingUser) return <p>Checking account...</p>;
+
+  if (isUnverifiedUser) return <Navigate to="/unverified" replace />;
 
   if (authError) return <Navigate to="/unauthorized" replace />;
 

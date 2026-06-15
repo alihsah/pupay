@@ -2,9 +2,12 @@ import { Navigate } from "react-router-dom";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 
 function RoleRedirect() {
-  const { currentUser, loadingUser, authError } = useCurrentUser();
+  const { currentUser, loadingUser, authError, isUnverifiedUser } =
+    useCurrentUser();
 
   if (loadingUser) return <p>Loading dashboard...</p>;
+
+  if (isUnverifiedUser) return <Navigate to="/unverified" replace />;
 
   if (authError) return <Navigate to="/unauthorized" replace />;
 
